@@ -1,0 +1,7 @@
+node_modules/
+.expo/
+Library/
+.config/
+.DS_Store
+*.log
+*.pem
