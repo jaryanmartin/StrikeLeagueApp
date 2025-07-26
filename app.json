@@ -28,6 +28,14 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      [
+        "react-native-ble-plx",
+        {
+          "isBackgroundEnabled": true,
+          "modes": ["peripheral", "central"],
+          "bluetoothAlwaysPermission": "Allow $(PRODUCT_NAME) to connect to bluetooth devices"
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",
@@ -38,8 +46,8 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "react-native-wifi-reborn",
-      "react-native-ble-plx"
+      "react-native-wifi-reborn"
+      
     ],
     "experiments": {
       "typedRoutes": true
