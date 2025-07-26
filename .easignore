@@ -5,3 +5,5 @@ Library/
 .DS_Store
 *.log
 *.pem
+/android
+/ios

@@ -21,19 +21,23 @@ export default function SettingsScreen() {
         <ThemedText style={styles.titleText}>Settings</ThemedText>
       </ThemedView>
 
-      <ThemedView style={styles.faceAngle}>
+      <Pressable onPress={() => router.push('/ble')} style={styles.connectBLE}>
+        <ThemedText type='subtitle'>Bluetooth Connection:</ThemedText>
+      </Pressable>
+
+      <ThemedView style={styles.options}>
         <ThemedText type='subtitle'>Units of Measurement:</ThemedText>
       </ThemedView>
 
-      <ThemedView style={styles.swingPath}>
+      <ThemedView style={styles.options}>
         <ThemedText type='subtitle'>Toggle Sound:</ThemedText>
       </ThemedView>
 
-      <ThemedView style={styles.sideAngle}>
+      <ThemedView style={styles.options}>
         <ThemedText type='subtitle'>Light/Dark Mode:</ThemedText>
       </ThemedView>
 
-      <ThemedView style={styles.attackAngle}>
+      <ThemedView style={styles.options}>
         <ThemedText type='subtitle'>Log Out:</ThemedText>
       </ThemedView>
 
@@ -59,26 +63,14 @@ const styles = StyleSheet.create({
     right: 40,
     bottom: 15,
 },
-  faceAngle: {
+  connectBLE: {
     textAlign: 'center',
     color: 'white',
     right: 75,
     bottom: 15,
     marginTop: 120,
 },
-  swingPath: {
-    color: 'white',
-    right: 75,
-    bottom: 15,
-    marginTop: 90,
-},
-  sideAngle: {
-    color: 'white',
-    right: 75,
-    bottom: 15,
-    marginTop: 90,
-},
-  attackAngle: {
+  options: {
     color: 'white',
     right: 75,
     bottom: 15,

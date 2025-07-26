@@ -22,11 +22,11 @@ export default function FeedbackScreen() {
         <ThemedText style={styles.titleText}>Swing Feedback</ThemedText>
       </ThemedView>
 
-      <ThemedView style={styles.faceAngle}>
+      <ThemedView style={styles.problem}>
         <ThemedText type='subtitle'>Problem Identified:</ThemedText>
       </ThemedView>
 
-      <ThemedView style={styles.swingPath}>
+      <ThemedView style={styles.options}>
         <ThemedText type='subtitle'>Feedback:</ThemedText>
       </ThemedView>
 
@@ -52,26 +52,14 @@ const styles = StyleSheet.create({
     right: 40,
     bottom: 15,
 },
-  faceAngle: {
+  problem: {
     textAlign: 'center',
     color: 'white',
     right: 75,
     bottom: 15,
     marginTop: 120,
 },
-  swingPath: {
-    color: 'white',
-    right: 75,
-    bottom: 15,
-    marginTop: 90,
-},
-  sideAngle: {
-    color: 'white',
-    right: 75,
-    bottom: 15,
-    marginTop: 90,
-},
-  attackAngle: {
+  options: {
     color: 'white',
     right: 75,
     bottom: 15,

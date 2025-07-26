@@ -25,19 +25,19 @@ export default function MetricScreen() {
         </Pressable>
       </ThemedView>
 
-      <ThemedView style={styles.swingPath}>
+      <ThemedView style={styles.options}>
         <Pressable onPress={() => console.log('Pressed!')}>
           <ThemedText type='subtitle'>Swing Path:</ThemedText>
         </Pressable>
       </ThemedView>
 
-      <ThemedView style={styles.sideAngle}>
+      <ThemedView style={styles.options}>
         <Pressable onPress={() => console.log('Pressed!')}>
           <ThemedText type='subtitle'>Side Angle:</ThemedText>
         </Pressable>
       </ThemedView>
 
-      <ThemedView style={styles.attackAngle}>
+      <ThemedView style={styles.options}>
         <Pressable onPress={() => console.log('Pressed!')}>
           <ThemedText type='subtitle'>Attack Angle:</ThemedText>
         </Pressable>
@@ -72,19 +72,7 @@ const styles = StyleSheet.create({
     bottom: 15,
     marginTop: 120,
 },
-  swingPath: {
-    color: 'white',
-    right: 75,
-    bottom: 15,
-    marginTop: 90,
-},
-  sideAngle: {
-    color: 'white',
-    right: 75,
-    bottom: 15,
-    marginTop: 90,
-},
-  attackAngle: {
+  options: {
     color: 'white',
     right: 75,
     bottom: 15,
