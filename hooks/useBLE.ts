@@ -14,6 +14,7 @@ import {
 
 const DATA_SERVICE_UUID = "19b10000-e8f2-537e-4f6c-d104768a1214";
 const COLOR_CHARACTERISTIC_UUID = "19b10001-e8f2-537e-4f6c-d104768a1217";
+const VIRTUAL_DEVICE_NAME = "MyVirtualBLE";
 
 const bleManager = new BleManager();
 
@@ -94,6 +95,8 @@ function useBLE() {
   const isDuplicteDevice = (devices: Device[], nextDevice: Device) =>
     devices.findIndex((device) => nextDevice.id === device.id) > -1;
 
+
+  // Here is where I left off 
   const startScan = () =>
     bleManager.startDeviceScan(null, null, (error, device) => {
       if (error) {
@@ -102,7 +105,7 @@ function useBLE() {
 
       if (
         device &&
-        (device.localName === "Arduino" || device.name === "Arduino")
+        (device.localName === VIRTUAL_DEVICE_NAME || device.name === VIRTUAL_DEVICE_NAME)
       ) {
         setAllDevices((prevState: Device[]) => {
           if (!isDuplicteDevice(prevState, device)) {

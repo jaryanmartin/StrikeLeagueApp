@@ -21,7 +21,7 @@ export default function BluetoothScreen() {
   useEffect(() => {
     requestPermissions();
   }, []);
-  
+ 
   return (
      <ThemedView style={{ flex: 1, padding: 100 }}>
       <Pressable onPress={() => {
