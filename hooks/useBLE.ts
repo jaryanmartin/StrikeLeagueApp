@@ -14,7 +14,7 @@ import {
 
 const DATA_SERVICE_UUID = "19b10000-e8f2-537e-4f6c-d104768a1214";
 const COLOR_CHARACTERISTIC_UUID = "19b10001-e8f2-537e-4f6c-d104768a1217";
-const VIRTUAL_DEVICE_NAME = "MyVirtualBLE";
+const VIRTUAL_DEVICE_NAME = "RaspberryPi"; // REPLACE THIS WITH RASPBERRY PI DEVICE NAME
 
 const bleManager = new BleManager();
 
@@ -22,6 +22,7 @@ function useBLE() {
   const [allDevices, setAllDevices] = useState<Device[]>([]);
   const [connectedDevice, setConnectedDevice] = useState<Device | null>(null);
   const [color, setColor] = useState("white");
+  // const [swingAngle, setSwingAngle= useState<number | null>(null);
 
   const requestAndroid31Permissions = async () => {
     const bluetoothScanPermission = await PermissionsAndroid.request(
@@ -96,7 +97,6 @@ function useBLE() {
     devices.findIndex((device) => nextDevice.id === device.id) > -1;
 
 
-  // Here is where I left off 
   const startScan = () =>
     bleManager.startDeviceScan(null, null, (error, device) => {
       if (error) {
@@ -116,6 +116,7 @@ function useBLE() {
       }
     });
 
+  // Here is where I left off 
   const onDataUpdate = (
     error: BleError | null,
     characteristic: Characteristic | null
@@ -129,6 +130,12 @@ function useBLE() {
     }
 
     const colorCode = base64.decode(characteristic.value);
+
+    // const decoded = base64.decode(characteristic.value);
+    // const [angle, path, attack] = decoded.split(',').map(parseFloat);
+    // setSwingAngle(angle);
+    // setSwingPath(path);
+    // setAttackAngle(attack);
 
     let color = "white";
     if (colorCode === "B") {
@@ -146,7 +153,7 @@ function useBLE() {
     if (device) {
       device.monitorCharacteristicForService(
         DATA_SERVICE_UUID,
-        COLOR_CHARACTERISTIC_UUID,
+        COLOR_CHARACTERISTIC_UUID, 
         onDataUpdate
       );
     } else {
@@ -162,7 +169,7 @@ function useBLE() {
     connectToDevice,
     allDevices,
     connectedDevice,
-    color,
+    color, // change this to like the metrics.
     requestPermissions,
     startScan,
     startStreamingData,
