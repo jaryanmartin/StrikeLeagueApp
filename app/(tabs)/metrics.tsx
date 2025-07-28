@@ -1,11 +1,19 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import type { BleState } from '@/stores/bleStores';
+import { useBleStore } from '@/stores/bleStores';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet } from 'react-native';
 
 export default function MetricScreen() {
   const router = useRouter();
+  
+  const faceAngle = useBleStore((state: BleState) => state.faceAngle);
+  const swingPath = useBleStore((state: BleState) => state.swingPath);
+  const sideAngle = useBleStore((state: BleState) => state.sideAngle);
+  const attackAngle = useBleStore((state: BleState) => state.attackAngle);
+
 
   return (
      <ThemedView style={{ flex: 1, padding: 100 }}>
@@ -20,27 +28,19 @@ export default function MetricScreen() {
       </ThemedView>
 
       <ThemedView style={styles.faceAngle}>
-        <Pressable onPress={() => console.log('Pressed!')}>
-          <ThemedText type='subtitle'>Face Angle:</ThemedText>
-        </Pressable>
+          <ThemedText type={'subtitle'}>Face Angle: {faceAngle !== null ? `${faceAngle}°` : "Waiting..."}</ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.options}>
-        <Pressable onPress={() => console.log('Pressed!')}>
-          <ThemedText type='subtitle'>Swing Path:</ThemedText>
-        </Pressable>
+          <ThemedText type={'subtitle'}>Swing Path: {swingPath !== null ? `${swingPath}°` : "Waiting..."}</ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.options}>
-        <Pressable onPress={() => console.log('Pressed!')}>
-          <ThemedText type='subtitle'>Side Angle:</ThemedText>
-        </Pressable>
+          <ThemedText type={'subtitle'}>Side Angle: {sideAngle !== null ? `${sideAngle}°` : "Waiting..."}</ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.options}>
-        <Pressable onPress={() => console.log('Pressed!')}>
-          <ThemedText type='subtitle'>Attack Angle:</ThemedText>
-        </Pressable>
+          <ThemedText type={'subtitle'}>Attack Angle: {attackAngle !== null ? `${attackAngle}°` : "Waiting..."}</ThemedText>
       </ThemedView>
 
     </ThemedView>

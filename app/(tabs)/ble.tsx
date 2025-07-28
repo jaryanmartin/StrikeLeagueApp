@@ -15,7 +15,10 @@ export default function BluetoothScreen() {
     allDevices,
     connectToDevice,
     connectedDevice,
-    color,
+    faceAngle,
+    swingPath,
+    sideAngle,
+    attackAngle,
   } = useBLE();
 
   useEffect(() => {
@@ -55,9 +58,23 @@ export default function BluetoothScreen() {
       {connectedDevice && (
         <View style={styles.connectionInfo}>
           <Text style={styles.connectedText}>Connected to: {connectedDevice.name}</Text>
-          <Text style={{ color: color, fontWeight: 'bold', marginTop: 10 }}>
-            Color: {color.toUpperCase()}
+
+        {/* Testing */}
+
+          {/* <Text style={styles.metricText}>
+            Face Angle: {faceAngle !== null ? `${faceAngle.toFixed(2)}°` : "Waiting..."}
           </Text>
+          <Text style={styles.metricText}>
+            Swing Path: {swingPath !== null ? `${swingPath.toFixed(2)}°` : "Waiting..."}
+          </Text>
+          <Text style={styles.metricText}>
+            Side Angle: {sideAngle !== null ? `${sideAngle.toFixed(2)}°` : "Waiting..."}
+          </Text>
+          <Text style={styles.metricText}>
+            Attack Angle: {attackAngle !== null ? `${attackAngle.toFixed(2)}°` : "Waiting..."}
+          </Text> */}
+
+          {/* {End of testing} */}
         </View>
       )}
     </ThemedView>
@@ -146,5 +163,11 @@ const styles = StyleSheet.create({
   connectedText: {
     color: 'white',
     fontSize: 16,
+  },
+  metricText: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 8,
+    color: '#aaa',
   },
 });

@@ -1,10 +1,11 @@
 /* eslint-disable no-bitwise */
+import { useBleStore } from '@/stores/bleStores';
+import { Buffer } from 'buffer';
 import { useState } from "react";
 import { PermissionsAndroid, Platform } from "react-native";
 
 // import * as ExpoDevice from "expo-device";
 
-import base64 from "react-native-base64";
 import {
   BleError,
   BleManager,
@@ -12,8 +13,12 @@ import {
   Device,
 } from "react-native-ble-plx";
 
-const DATA_SERVICE_UUID = "19b10000-e8f2-537e-4f6c-d104768a1214";
-const COLOR_CHARACTERISTIC_UUID = "19b10001-e8f2-537e-4f6c-d104768a1217";
+const DATA_SERVICE_UUID = "c7e9f018-211c-44ac-8729-4d3287170d62";
+const FACEANGLE_CHARACTERISTIC_UUID = "2c58a217-0a9b-445f-adac-0b37bd8635c3";
+const SWINGPATH_CHARACTERISTIC_UUID = "449145fa-bad8-4b71-8094-44089b2c29b9";
+const SIDEANGLE_CHARACTERISTIC_UUID = "a019ec27-5acf-4128-8a12-435901fc07ca";
+const ATTACKANGLE_CHARACTERISTIC_UUID = "712da68d-cc4e-423e-b818-3f4cdf3a712a";
+
 const VIRTUAL_DEVICE_NAME = "RaspberryPi"; // REPLACE THIS WITH RASPBERRY PI DEVICE NAME
 
 const bleManager = new BleManager();
@@ -21,8 +26,13 @@ const bleManager = new BleManager();
 function useBLE() {
   const [allDevices, setAllDevices] = useState<Device[]>([]);
   const [connectedDevice, setConnectedDevice] = useState<Device | null>(null);
-  const [color, setColor] = useState("white");
-  // const [swingAngle, setSwingAngle= useState<number | null>(null);
+  
+  const {
+  setFaceAngle,
+  setSwingPath,
+  setSideAngle,
+  setAttackAngle,
+} = useBleStore.getState();
 
   const requestAndroid31Permissions = async () => {
     const bluetoothScanPermission = await PermissionsAndroid.request(
@@ -129,33 +139,56 @@ function useBLE() {
       return;
     }
 
-    const colorCode = base64.decode(characteristic.value);
+    // const metricValue = base64.decode(characteristic.value);
+    const raw = Buffer.from(characteristic.value, 'base64');
+    const metricValue = raw.readInt16LE(0);
+    // react-native-ble-plx converts raw data from peripheral into base64
 
-    // const decoded = base64.decode(characteristic.value);
-    // const [angle, path, attack] = decoded.split(',').map(parseFloat);
-    // setSwingAngle(angle);
-    // setSwingPath(path);
-    // setAttackAngle(attack);
-
-    let color = "white";
-    if (colorCode === "B") {
-      color = "blue";
-    } else if (colorCode === "R") {
-      color = "red";
-    } else if (colorCode === "G") {
-      color = "green";
+    if (characteristic.uuid == FACEANGLE_CHARACTERISTIC_UUID)
+    {
+      setFaceAngle(metricValue);
     }
-
-    setColor(color);
+    else if (characteristic.uuid == SWINGPATH_CHARACTERISTIC_UUID)
+    {
+      setSwingPath(metricValue);
+    }
+    else if ( characteristic.uuid == SIDEANGLE_CHARACTERISTIC_UUID)
+    {
+      setSideAngle(metricValue);
+    }
+    else if (characteristic.uuid == ATTACKANGLE_CHARACTERISTIC_UUID)
+    {
+      setAttackAngle(metricValue);
+    }
   };
 
   const startStreamingData = async (device: Device) => {
     if (device) {
+
       device.monitorCharacteristicForService(
         DATA_SERVICE_UUID,
-        COLOR_CHARACTERISTIC_UUID, 
+        FACEANGLE_CHARACTERISTIC_UUID, 
         onDataUpdate
       );
+
+      device.monitorCharacteristicForService(
+        DATA_SERVICE_UUID,
+        SWINGPATH_CHARACTERISTIC_UUID, 
+        onDataUpdate
+      );
+
+      device.monitorCharacteristicForService(
+        DATA_SERVICE_UUID,
+        SIDEANGLE_CHARACTERISTIC_UUID, 
+        onDataUpdate
+      );
+
+      device.monitorCharacteristicForService(
+        DATA_SERVICE_UUID,
+        ATTACKANGLE_CHARACTERISTIC_UUID, 
+        onDataUpdate
+      );
+
     } else {
       console.log("No Device Connected");
     }
@@ -169,7 +202,6 @@ function useBLE() {
     connectToDevice,
     allDevices,
     connectedDevice,
-    color, // change this to like the metrics.
     requestPermissions,
     startScan,
     startStreamingData,
