@@ -15,10 +15,6 @@ export default function BluetoothScreen() {
     allDevices,
     connectToDevice,
     connectedDevice,
-    faceAngle,
-    swingPath,
-    sideAngle,
-    attackAngle,
   } = useBLE();
 
   useEffect(() => {
@@ -58,23 +54,6 @@ export default function BluetoothScreen() {
       {connectedDevice && (
         <View style={styles.connectionInfo}>
           <Text style={styles.connectedText}>Connected to: {connectedDevice.name}</Text>
-
-        {/* Testing */}
-
-          {/* <Text style={styles.metricText}>
-            Face Angle: {faceAngle !== null ? `${faceAngle.toFixed(2)}°` : "Waiting..."}
-          </Text>
-          <Text style={styles.metricText}>
-            Swing Path: {swingPath !== null ? `${swingPath.toFixed(2)}°` : "Waiting..."}
-          </Text>
-          <Text style={styles.metricText}>
-            Side Angle: {sideAngle !== null ? `${sideAngle.toFixed(2)}°` : "Waiting..."}
-          </Text>
-          <Text style={styles.metricText}>
-            Attack Angle: {attackAngle !== null ? `${attackAngle.toFixed(2)}°` : "Waiting..."}
-          </Text> */}
-
-          {/* {End of testing} */}
         </View>
       )}
     </ThemedView>

@@ -1,0 +1,45 @@
+[
+  {
+    "id": "face_closed",
+    "metric": "faceAngle",
+    "range": { "min": -90, "max": -2.01 },
+    "feedback": "Your club face is closed at impact, leading to pulls or hooks. Check your grip to ensure it’s not too strong, and rehearse squaring the club face at address and through impact."
+  },
+  {
+    "id": "face_open",
+    "metric": "faceAngle",
+    "range": { "min": -2, "max": 2 },
+    "feedback": "Your club face is neutral at impact. This is ideal. Nice work."
+  },
+  {
+    "id": "face_neutral",
+    "metric": "faceAngle",
+    "range": { "min": 2.01, "max": 90 },
+    "feedback": "Your club face is open at impact. This can cause slices. Check your grip to ensure it’s not too strong, and rehearse squaring the club face at address and through impact."
+  },
+  {
+    "id": "club_path_in_to_out",
+    "metric": "swingPath",
+    "range": { "min": 3, "max": 90 },
+    "feedback": "Your club path is in-to-out, which can cause draws or hooks. Try focusing on swinging more along your target line—place an alignment stick on the ground to guide your swing direction."
+  },
+  {
+    "id": "attack_upward",
+    "metric": "attackAngle",
+    "range": { "min": 2.01, "max": 90 },
+    "feedback": "Your attack angle is too upward. Good iron shots require a downward (negative) attack angle. Try placing the ball slightly farther back in your stance and focus on hitting ball-then-turf."
+  },
+  {
+    "id": "attack_neutral",
+    "metric": "attackAngle",
+    "range": { "min": -2, "max": 2 },
+    "feedback": "Your club face is neutral at impact. This is ideal. Nice work."
+  },
+  {
+    "id": "attack_downward",
+    "metric": "attackAngle",
+    "range": { "min": -90, "max": -2.01 },
+    "feedback": "Your attack angle is too downward. Good iron shots require a downward (negative) attack angle, however this is too steep. Try placing the ball slightly more forward in your stance and focus on hitting ball-then-turf."
+  }
+
+]

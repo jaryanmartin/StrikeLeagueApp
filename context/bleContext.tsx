@@ -23,3 +23,5 @@
 //     </BleContext.Provider>
 //   );
 // };
+
+// Removed this attempt for global variables and used the zustard library instead. 

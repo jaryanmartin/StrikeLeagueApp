@@ -1,14 +1,18 @@
-import { StyleSheet } from 'react-native';
-
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import useFeedback from '@/hooks/useFeedback';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Pressable } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 
 export default function FeedbackScreen() {
   const router = useRouter();
 
+  const {
+    problem,
+    feedback,
+  } = useFeedback();
+  
   return (
      <ThemedView style={{ flex: 1, padding: 100 }}>
       <Pressable onPress={() => {
@@ -23,11 +27,11 @@ export default function FeedbackScreen() {
       </ThemedView>
 
       <ThemedView style={styles.problem}>
-        <ThemedText type='subtitle'>Problem Identified:</ThemedText>
+        <ThemedText type='subtitle'>Problem Identified: {problem !== null ? `${problem}` : "Waiting..."}</ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.options}>
-        <ThemedText type='subtitle'>Feedback:</ThemedText>
+        <ThemedText type='subtitle'>Feedback: {feedback !== null ? `${feedback}` : "Waiting..."}</ThemedText>
       </ThemedView>
 
     </ThemedView>
