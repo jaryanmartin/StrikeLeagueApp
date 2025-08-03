@@ -13,13 +13,14 @@ import {
   Device,
 } from "react-native-ble-plx";
 
-const DATA_SERVICE_UUID = "c7e9f018-211c-44ac-8729-4d3287170d62";
+const DATA_SERVICE_UUID = "96f0284d-8895-4c08-baaf-402a2f7e8c5b";
+const CHARACTERISTIC_UUID = "d9c146d3-df83-49ec-801d-70494060d6d8";
 const FACEANGLE_CHARACTERISTIC_UUID = "2c58a217-0a9b-445f-adac-0b37bd8635c3";
 const SWINGPATH_CHARACTERISTIC_UUID = "449145fa-bad8-4b71-8094-44089b2c29b9";
 const SIDEANGLE_CHARACTERISTIC_UUID = "a019ec27-5acf-4128-8a12-435901fc07ca";
 const ATTACKANGLE_CHARACTERISTIC_UUID = "712da68d-cc4e-423e-b818-3f4cdf3a712a";
 
-const VIRTUAL_DEVICE_NAME = "RaspberryPi"; // REPLACE THIS WITH RASPBERRY PI DEVICE NAME
+const VIRTUAL_DEVICE_NAME = "Company17_Rpi5"; 
 
 const bleManager = new BleManager();
 
@@ -94,10 +95,12 @@ function useBLE() {
     try {
       const deviceConnection = await bleManager.connectToDevice(device.id);
       setConnectedDevice(deviceConnection);
-      await deviceConnection.discoverAllServicesAndCharacteristics();
-      bleManager.stopDeviceScan();
 
-      startStreamingData(deviceConnection);
+      await deviceConnection.requestMTU(185);
+      await deviceConnection.discoverAllServicesAndCharacteristics();
+      
+      bleManager.stopDeviceScan();
+      await startStreamingData(deviceConnection);
     } catch (e) {
       console.log("FAILED TO CONNECT", e);
     }
@@ -139,27 +142,67 @@ function useBLE() {
       return;
     }
 
-    // const metricValue = base64.decode(characteristic.value);
-    const raw = Buffer.from(characteristic.value, 'base64');
-    const metricValue = raw.readInt16LE(0);
-    // react-native-ble-plx converts raw data from peripheral into base64
+    try {
+      // 1. Decode from base64 (BLE-encoded format)
+      const raw = Buffer.from(characteristic.value, 'base64');
 
-    if (characteristic.uuid == FACEANGLE_CHARACTERISTIC_UUID)
-    {
-      setFaceAngle(metricValue);
+      // 2. Convert to UTF-8 string (should be a JSON string)
+      const jsonStr = raw.toString('utf-8');
+
+      console.log("UTF-8 Decoded String:", jsonStr);
+
+      // 3. Parse the JSON string
+      const data = JSON.parse(jsonStr);
+
+      console.log("Received BLE data:", data);
+
+      // 4. Update app state if values are valid numbers
+      if (typeof data["face angle"] === "number") {
+        setFaceAngle(data["face angle"]);
+      }
+
+      if (typeof data["swing path"] === "number") {
+        setSwingPath(data["swing path"]);
+      }
+
+      if (typeof data["attack angle"] === "number") {
+        setAttackAngle(data["attack angle"]);
+      }
+
+      if (typeof data["side angle"] === "number") {
+        setSideAngle(data["side angle"]);
+      }
+
+      if (typeof data["feedback"] === "string") {
+        console.log("Feedback:", data["feedback"]);
+      }
+
+    } catch (err) {
+      console.error("Failed to parse BLE JSON:", err);
     }
-    else if (characteristic.uuid == SWINGPATH_CHARACTERISTIC_UUID)
-    {
-      setSwingPath(metricValue);
-    }
-    else if ( characteristic.uuid == SIDEANGLE_CHARACTERISTIC_UUID)
-    {
-      setSideAngle(metricValue);
-    }
-    else if (characteristic.uuid == ATTACKANGLE_CHARACTERISTIC_UUID)
-    {
-      setAttackAngle(metricValue);
-    }
+
+
+
+    // react-native-ble-plx converts raw data from peripheral into base64
+    // const raw = Buffer.from(characteristic.value, 'base64');
+    // const metricValue = raw.readInt16LE(0);
+
+    // if (characteristic.uuid == FACEANGLE_CHARACTERISTIC_UUID)
+    // {
+    //   setFaceAngle(metricValue);
+    // }
+    // else if (characteristic.uuid == SWINGPATH_CHARACTERISTIC_UUID)
+    // {
+    //   setSwingPath(metricValue);
+    // }
+    // else if ( characteristic.uuid == SIDEANGLE_CHARACTERISTIC_UUID)
+    // {
+    //   setSideAngle(metricValue);
+    // }
+    // else if (characteristic.uuid == ATTACKANGLE_CHARACTERISTIC_UUID)
+    // {
+    //   setAttackAngle(metricValue);
+    // }
   };
 
   const startStreamingData = async (device: Device) => {
@@ -167,27 +210,33 @@ function useBLE() {
 
       device.monitorCharacteristicForService(
         DATA_SERVICE_UUID,
-        FACEANGLE_CHARACTERISTIC_UUID, 
+        CHARACTERISTIC_UUID, 
         onDataUpdate
       );
 
-      device.monitorCharacteristicForService(
-        DATA_SERVICE_UUID,
-        SWINGPATH_CHARACTERISTIC_UUID, 
-        onDataUpdate
-      );
+      // device.monitorCharacteristicForService(
+      //   DATA_SERVICE_UUID,
+      //   FACEANGLE_CHARACTERISTIC_UUID, 
+      //   onDataUpdate
+      // );
 
-      device.monitorCharacteristicForService(
-        DATA_SERVICE_UUID,
-        SIDEANGLE_CHARACTERISTIC_UUID, 
-        onDataUpdate
-      );
+      // device.monitorCharacteristicForService(
+      //   DATA_SERVICE_UUID,
+      //   SWINGPATH_CHARACTERISTIC_UUID, 
+      //   onDataUpdate
+      // );
 
-      device.monitorCharacteristicForService(
-        DATA_SERVICE_UUID,
-        ATTACKANGLE_CHARACTERISTIC_UUID, 
-        onDataUpdate
-      );
+      // device.monitorCharacteristicForService(
+      //   DATA_SERVICE_UUID,
+      //   SIDEANGLE_CHARACTERISTIC_UUID, 
+      //   onDataUpdate
+      // );
+
+      // device.monitorCharacteristicForService(
+      //   DATA_SERVICE_UUID,
+      //   ATTACKANGLE_CHARACTERISTIC_UUID, 
+      //   onDataUpdate
+      // );
 
     } else {
       console.log("No Device Connected");
@@ -198,6 +247,29 @@ function useBLE() {
   bleManager.stopDeviceScan();
 };
 
+  const startRecord = async() => {
+   
+    if (!connectedDevice) {
+    console.error("No device connected.");
+    return;
+  }
+
+  const message = "A";
+  const base64 = Buffer.from(message, 'utf-8').toString('base64');
+
+  try {
+    await bleManager.writeCharacteristicWithoutResponseForDevice(
+      connectedDevice.id,
+      DATA_SERVICE_UUID,
+      CHARACTERISTIC_UUID,
+      base64
+    );
+    console.log("START command sent.");
+    } catch (error) {
+      console.error("Failed to send START:", error);
+    }
+  };
+
   return {
     connectToDevice,
     allDevices,
@@ -206,6 +278,7 @@ function useBLE() {
     startScan,
     startStreamingData,
     stopScan,
+    startRecord,
   };
 }
 

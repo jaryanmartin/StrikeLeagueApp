@@ -1,5 +1,6 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import useBLE from '@/hooks/useBLE';
 import type { BleState } from '@/stores/bleStores';
 import { useBleStore } from '@/stores/bleStores';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,6 +14,10 @@ export default function MetricScreen() {
   const swingPath = useBleStore((state: BleState) => state.swingPath);
   const sideAngle = useBleStore((state: BleState) => state.sideAngle);
   const attackAngle = useBleStore((state: BleState) => state.attackAngle);
+
+  const {
+    startRecord,
+  } = useBLE();
 
 
   return (
@@ -42,6 +47,10 @@ export default function MetricScreen() {
       <ThemedView style={styles.options}>
           <ThemedText type={'subtitle'}>Attack Angle: {attackAngle !== null ? `${attackAngle}°` : "Waiting..."}</ThemedText>
       </ThemedView>
+
+      {/* <View style={styles.scanControls}>
+        <Button title="Start Recording" onPress={startRecord} />
+      </View> */}
 
     </ThemedView>
   );
@@ -88,5 +97,10 @@ const styles = StyleSheet.create({
     bottom: 830,
     position: 'absolute',
     tintColor: 'white',
+  },
+  scanControls: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 20,
   },
 });

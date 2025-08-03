@@ -15,6 +15,7 @@ export default function BluetoothScreen() {
     allDevices,
     connectToDevice,
     connectedDevice,
+    startRecord
   } = useBLE();
 
   useEffect(() => {
@@ -56,7 +57,13 @@ export default function BluetoothScreen() {
           <Text style={styles.connectedText}>Connected to: {connectedDevice.name}</Text>
         </View>
       )}
+
+      <View style={styles.scanControls}>
+        <Button title="Start Recording" onPress={startRecord} />
+      </View>
     </ThemedView>
+
+    
   );
 }
 
