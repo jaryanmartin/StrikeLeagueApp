@@ -1,6 +1,6 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import useFeedback from '@/hooks/useFeedback';
+import { BleState, useBleStore } from '@/stores/bleStores';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet } from 'react-native';
@@ -8,10 +8,12 @@ import { Pressable, StyleSheet } from 'react-native';
 export default function FeedbackScreen() {
   const router = useRouter();
 
-  const {
-    problem,
-    feedback,
-  } = useFeedback();
+  // const {
+  //   // problem,
+  //   feedback,
+  // } = useFeedback();
+
+  const feedback = useBleStore((state: BleState) => state.feedback);
   
   return (
      <ThemedView style={{ flex: 1, padding: 100 }}>
@@ -26,11 +28,11 @@ export default function FeedbackScreen() {
         <ThemedText style={styles.titleText}>Swing Feedback</ThemedText>
       </ThemedView>
 
-      <ThemedView style={styles.problem}>
+      {/* <ThemedView style={styles.problem}>
         <ThemedText type='subtitle'>Problem Identified: {problem !== null ? `${problem}` : "Waiting..."}</ThemedText>
-      </ThemedView>
+      </ThemedView> */}
 
-      <ThemedView style={styles.options}>
+      <ThemedView style={styles.feedback}>
         <ThemedText type='subtitle'>Feedback: {feedback !== null ? `${feedback}` : "Waiting..."}</ThemedText>
       </ThemedView>
 
@@ -56,19 +58,19 @@ const styles = StyleSheet.create({
     right: 40,
     bottom: 15,
 },
-  problem: {
+  feedback: {
     textAlign: 'center',
     color: 'white',
     right: 75,
     bottom: 15,
     marginTop: 120,
 },
-  options: {
-    color: 'white',
-    right: 75,
-    bottom: 15,
-    marginTop: 90,
-},
+//   options: {
+//     color: 'white',
+//     right: 75,
+//     bottom: 15,
+//     marginTop: 90,
+// },
   boxText: {
     fontSize: 20,
     fontWeight: '500',

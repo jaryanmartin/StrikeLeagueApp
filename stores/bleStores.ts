@@ -6,6 +6,7 @@ export type BleState = {
   swingPath: number | null;
   sideAngle: number | null;
   attackAngle: number | null;
+  feedback: string | null;
 //   aiFeedback: string | null;
 //   logs: { timestamp: number; metrics: Record<string, number | null> }[];
 
@@ -13,6 +14,7 @@ export type BleState = {
   setSwingPath: (val: number) => void;
   setSideAngle: (val: number) => void;
   setAttackAngle: (val: number) => void;
+  setFeedback: (msg: string) => void;
 //   setAiFeedback: (msg: string) => void;
 //   addLog: () => void;
 };
@@ -22,6 +24,7 @@ export const useBleStore = create<BleState>((set, get) => ({
   swingPath: null,
   sideAngle: null,
   attackAngle: null,
+  feedback: null,
 //   aiFeedback: null,
 //   logs: [],
 
@@ -29,6 +32,7 @@ export const useBleStore = create<BleState>((set, get) => ({
   setSwingPath: (val) => set({ swingPath: val }),
   setSideAngle: (val) => set({ sideAngle: val }),
   setAttackAngle: (val) => set({ attackAngle: val }),
+  setFeedback: (msg) => set({feedback: msg}),
 //   setAiFeedback: (msg) => set({ aiFeedback: msg }),
 
 //   addLog: () => {

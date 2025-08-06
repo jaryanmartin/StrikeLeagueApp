@@ -14,11 +14,12 @@ import {
 } from "react-native-ble-plx";
 
 const DATA_SERVICE_UUID = "96f0284d-8895-4c08-baaf-402a2f7e8c5b";
-const CHARACTERISTIC_UUID = "d9c146d3-df83-49ec-801d-70494060d6d8";
-const FACEANGLE_CHARACTERISTIC_UUID = "2c58a217-0a9b-445f-adac-0b37bd8635c3";
-const SWINGPATH_CHARACTERISTIC_UUID = "449145fa-bad8-4b71-8094-44089b2c29b9";
-const SIDEANGLE_CHARACTERISTIC_UUID = "a019ec27-5acf-4128-8a12-435901fc07ca";
-const ATTACKANGLE_CHARACTERISTIC_UUID = "712da68d-cc4e-423e-b818-3f4cdf3a712a";
+const METRIC_CHARACTERISTIC_UUID = "d9c146d3-df83-49ec-801d-70494060d6d8";
+const FEEDBACK_CHARACTERISTIC_UUID = "2c58a217-0a9b-445f-adac-0b37bd8635c3";
+// const FACEANGLE_CHARACTERISTIC_UUID = "2c58a217-0a9b-445f-adac-0b37bd8635c3";
+// const SWINGPATH_CHARACTERISTIC_UUID = "449145fa-bad8-4b71-8094-44089b2c29b9";
+// const SIDEANGLE_CHARACTERISTIC_UUID = "a019ec27-5acf-4128-8a12-435901fc07ca";
+// const ATTACKANGLE_CHARACTERISTIC_UUID = "712da68d-cc4e-423e-b818-3f4cdf3a712a";
 
 const VIRTUAL_DEVICE_NAME = "Company17_Rpi5"; 
 
@@ -33,6 +34,7 @@ function useBLE() {
   setSwingPath,
   setSideAngle,
   setAttackAngle,
+  setFeedback,
 } = useBleStore.getState();
 
   const requestAndroid31Permissions = async () => {
@@ -129,7 +131,6 @@ function useBLE() {
       }
     });
 
-  // Here is where I left off 
   const onDataUpdate = (
     error: BleError | null,
     characteristic: Characteristic | null
@@ -137,49 +138,43 @@ function useBLE() {
     if (error) {
       console.log(error);
       return;
-    } else if (!characteristic?.value) {
+    } 
+    if (!characteristic?.value) {
       console.log("No Data was received");
       return;
     }
 
-    try {
-      // 1. Decode from base64 (BLE-encoded format)
-      const raw = Buffer.from(characteristic.value, 'base64');
+    const raw = Buffer.from(characteristic.value, 'base64').toString('utf-8');
+    // console.log("UTF-8 Decoded String:", jsonStr);
 
-      // 2. Convert to UTF-8 string (should be a JSON string)
-      const jsonStr = raw.toString('utf-8');
+    if ( characteristic.uuid === METRIC_CHARACTERISTIC_UUID) 
+    {
+      try {
+        const data = JSON.parse(raw);
+        // console.log("Received BLE data:", data);
 
-      console.log("UTF-8 Decoded String:", jsonStr);
+        if (typeof data["face angle"] === "number") {
+          setFaceAngle(data["face angle"]);
+        }
 
-      // 3. Parse the JSON string
-      const data = JSON.parse(jsonStr);
+        if (typeof data["swing path"] === "number") {
+          setSwingPath(data["swing path"]);
+        }
 
-      console.log("Received BLE data:", data);
+        if (typeof data["attack angle"] === "number") {
+          setAttackAngle(data["attack angle"]);
+        }
 
-      // 4. Update app state if values are valid numbers
-      if (typeof data["face angle"] === "number") {
-        setFaceAngle(data["face angle"]);
+        if (typeof data["side angle"] === "number") {
+          setSideAngle(data["side angle"]);
+        }
+      } catch (err) {
+        console.error("Failed to parse BLE JSON:", err);
       }
-
-      if (typeof data["swing path"] === "number") {
-        setSwingPath(data["swing path"]);
+     } else if ( characteristic.uuid === FEEDBACK_CHARACTERISTIC_UUID ) 
+      {
+        setFeedback(raw);
       }
-
-      if (typeof data["attack angle"] === "number") {
-        setAttackAngle(data["attack angle"]);
-      }
-
-      if (typeof data["side angle"] === "number") {
-        setSideAngle(data["side angle"]);
-      }
-
-      if (typeof data["feedback"] === "string") {
-        console.log("Feedback:", data["feedback"]);
-      }
-
-    } catch (err) {
-      console.error("Failed to parse BLE JSON:", err);
-    }
 
 
 
@@ -210,7 +205,13 @@ function useBLE() {
 
       device.monitorCharacteristicForService(
         DATA_SERVICE_UUID,
-        CHARACTERISTIC_UUID, 
+        METRIC_CHARACTERISTIC_UUID, 
+        onDataUpdate
+      );
+
+      device.monitorCharacteristicForService(
+        DATA_SERVICE_UUID,
+        FEEDBACK_CHARACTERISTIC_UUID,
         onDataUpdate
       );
 
@@ -261,7 +262,7 @@ function useBLE() {
     await bleManager.writeCharacteristicWithoutResponseForDevice(
       connectedDevice.id,
       DATA_SERVICE_UUID,
-      CHARACTERISTIC_UUID,
+      METRIC_CHARACTERISTIC_UUID,
       base64
     );
     console.log("START command sent.");
