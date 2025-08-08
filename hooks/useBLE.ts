@@ -16,6 +16,7 @@ import {
 const DATA_SERVICE_UUID = "96f0284d-8895-4c08-baaf-402a2f7e8c5b";
 const METRIC_CHARACTERISTIC_UUID = "d9c146d3-df83-49ec-801d-70494060d6d8";
 const FEEDBACK_CHARACTERISTIC_UUID = "2c58a217-0a9b-445f-adac-0b37bd8635c3";
+const LAUNCH_MONITOR_CHARACTERISTIC_UUID = "00000000-0000-0000-0000-000000000000";
 // const FACEANGLE_CHARACTERISTIC_UUID = "2c58a217-0a9b-445f-adac-0b37bd8635c3";
 // const SWINGPATH_CHARACTERISTIC_UUID = "449145fa-bad8-4b71-8094-44089b2c29b9";
 // const SIDEANGLE_CHARACTERISTIC_UUID = "a019ec27-5acf-4128-8a12-435901fc07ca";
@@ -271,6 +272,47 @@ function useBLE() {
     }
   };
 
+  const readFeedback = async () => {
+    if (!connectedDevice) {
+      console.error("No device connected.");
+      return;
+    }
+
+    try {
+      const characteristic = await bleManager.readCharacteristicForDevice(
+        connectedDevice.id,
+        DATA_SERVICE_UUID,
+        FEEDBACK_CHARACTERISTIC_UUID
+      );
+      const raw = Buffer.from(characteristic?.value ?? '', 'base64').toString('utf-8');
+      setFeedback(raw);
+    } catch (error) {
+      console.error("Failed to read feedback:", error);
+    }
+  };
+
+  const turnOffLaunchMonitor = async () => {
+    if (!connectedDevice) {
+      console.error("No device connected.");
+      return;
+    }
+
+    const message = "0";
+    const base64 = Buffer.from(message, 'utf-8').toString('base64');
+
+    try {
+      await bleManager.writeCharacteristicWithoutResponseForDevice(
+        connectedDevice.id,
+        DATA_SERVICE_UUID,
+        LAUNCH_MONITOR_CHARACTERISTIC_UUID,
+        base64
+      );
+      console.log("Launch monitor off command sent.");
+    } catch (error) {
+      console.error("Failed to send launch monitor off command:", error);
+    }
+  };
+
   return {
     connectToDevice,
     allDevices,
@@ -280,6 +322,8 @@ function useBLE() {
     startStreamingData,
     stopScan,
     startRecord,
+    readFeedback,
+    turnOffLaunchMonitor,
   };
 }
 

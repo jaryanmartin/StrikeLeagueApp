@@ -2,11 +2,13 @@ import { Pressable, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import useBLE from '@/hooks/useBLE';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const { turnOffLaunchMonitor } = useBLE();
   
   return (
      <ThemedView style={{ flex: 1, padding: 100 }}>
@@ -25,7 +27,7 @@ export default function SettingsScreen() {
         <ThemedText type='subtitle'>Bluetooth Connection:</ThemedText>
       </Pressable>
 
-      <ThemedView style={styles.options}>
+      {/* <ThemedView style={styles.options}>
         <ThemedText type='subtitle'>Units of Measurement:</ThemedText>
       </ThemedView>
 
@@ -35,7 +37,11 @@ export default function SettingsScreen() {
 
       <ThemedView style={styles.options}>
         <ThemedText type='subtitle'>Light/Dark Mode:</ThemedText>
-      </ThemedView>
+      </ThemedView> */}
+
+      <Pressable onPress={turnOffLaunchMonitor} style={styles.options}>
+        <ThemedText type='subtitle'>Turn Off Launch Monitor:</ThemedText>
+      </Pressable>
 
       <ThemedView style={styles.options}>
         <ThemedText type='subtitle'>Log Out:</ThemedText>

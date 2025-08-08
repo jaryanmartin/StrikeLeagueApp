@@ -1,5 +1,6 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import useBLE from '@/hooks/useBLE';
 import { BleState, useBleStore } from '@/stores/bleStores';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -14,7 +15,7 @@ export default function FeedbackScreen() {
   // } = useFeedback();
 
   const feedback = useBleStore((state: BleState) => state.feedback);
-  // const { readFeedback } = useBLE();
+  const { readFeedback } = useBLE();
 
   return (
      <ThemedView style={{ flex: 1, padding: 100 }}>
@@ -36,6 +37,10 @@ export default function FeedbackScreen() {
       <ThemedView style={styles.feedback}>
         <ThemedText type='subtitle'>Feedback: {feedback !== null ? `${feedback}` : "Waiting..."}</ThemedText>
       </ThemedView>
+
+      <Pressable onPress={readFeedback} style={styles.readButton}>
+        <Ionicons name="refresh" size={28} color="white" />
+      </Pressable>
 
     </ThemedView>
   );
@@ -66,12 +71,6 @@ const styles = StyleSheet.create({
     bottom: 15,
     marginTop: 120,
 },
-//   options: {
-//     color: 'white',
-//     right: 75,
-//     bottom: 15,
-//     marginTop: 90,
-// },
   boxText: {
     fontSize: 20,
     fontWeight: '500',
@@ -82,5 +81,10 @@ const styles = StyleSheet.create({
     bottom: 830,
     position: 'absolute',
     tintColor: 'white',
+  },
+  readButton: {
+    position: 'absolute',
+    right: 350,
+    bottom: 760,
   },
 });
