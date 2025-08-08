@@ -40,12 +40,12 @@ export default function SettingsScreen() {
       </ThemedView> */}
 
       <Pressable onPress={turnOffLaunchMonitor} style={styles.options}>
-        <ThemedText type='subtitle'>Turn Off Launch Monitor:</ThemedText>
+        <ThemedText type='subtitle'>Power Off:</ThemedText>
       </Pressable>
 
-      <ThemedView style={styles.options}>
+      {/* <ThemedView style={styles.options}>
         <ThemedText type='subtitle'>Log Out:</ThemedText>
-      </ThemedView>
+      </ThemedView> */}
 
     </ThemedView>
   );
