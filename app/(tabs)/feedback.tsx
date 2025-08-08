@@ -14,7 +14,8 @@ export default function FeedbackScreen() {
   // } = useFeedback();
 
   const feedback = useBleStore((state: BleState) => state.feedback);
-  
+  // const { readFeedback } = useBLE();
+
   return (
      <ThemedView style={{ flex: 1, padding: 100 }}>
       <Pressable onPress={() => {
