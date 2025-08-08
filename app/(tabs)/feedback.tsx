@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   },
   readButton: {
     position: 'absolute',
-    right: 350,
-    bottom: 760,
+    right: 190,
+    bottom: 200,
   },
 });

@@ -39,9 +39,9 @@ export default function SettingsScreen() {
         <ThemedText type='subtitle'>Light/Dark Mode:</ThemedText>
       </ThemedView> */}
 
-      <Pressable onPress={turnOffLaunchMonitor} style={styles.options}>
+      {/* <Pressable onPress={turnOffLaunchMonitor} style={styles.options}>
         <ThemedText type='subtitle'>Power Off:</ThemedText>
-      </Pressable>
+      </Pressable> */}
 
       {/* <ThemedView style={styles.options}>
         <ThemedText type='subtitle'>Log Out:</ThemedText>
@@ -92,5 +92,18 @@ const styles = StyleSheet.create({
     bottom: 830,
     position: 'absolute',
     tintColor: 'white',
+  },
+  boxHistory: {
+    marginTop: 30,
+    borderRadius: 20,
+    borderWidth: 3,
+    borderColor: 'black',
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    marginVertical: 10,
+    alignItems: 'center',
+    width: 350,
+    alignSelf: 'center',
+    backgroundColor: '#FFD9D9',
   },
 });

@@ -22,7 +22,7 @@ const LAUNCH_MONITOR_CHARACTERISTIC_UUID = "00000000-0000-0000-0000-000000000000
 // const SIDEANGLE_CHARACTERISTIC_UUID = "a019ec27-5acf-4128-8a12-435901fc07ca";
 // const ATTACKANGLE_CHARACTERISTIC_UUID = "712da68d-cc4e-423e-b818-3f4cdf3a712a";
 
-const VIRTUAL_DEVICE_NAME = "Company17_Rpi5"; 
+const VIRTUAL_DEVICE_NAME = "Company17_Rpi"; 
 
 const bleManager = new BleManager();
 
@@ -210,11 +210,11 @@ function useBLE() {
         onDataUpdate
       );
 
-      device.monitorCharacteristicForService(
-        DATA_SERVICE_UUID,
-        FEEDBACK_CHARACTERISTIC_UUID,
-        onDataUpdate
-      );
+      // device.monitorCharacteristicForService(
+      //   DATA_SERVICE_UUID,
+      //   FEEDBACK_CHARACTERISTIC_UUID,
+      //   onDataUpdate
+      // );
 
       // device.monitorCharacteristicForService(
       //   DATA_SERVICE_UUID,

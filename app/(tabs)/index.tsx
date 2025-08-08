@@ -28,9 +28,9 @@ export default function HomeScreen() {
         <ThemedText style={styles.boxText}>Swing Feedback</ThemedText>
       </Pressable>
 
-      <Pressable onPress={() => router.push('/history')} style={styles.boxHistory}>
+      {/* <Pressable onPress={() => router.push('/history')} style={styles.boxHistory}>
         <ThemedText style={styles.boxText}>History Logs</ThemedText>
-      </Pressable>
+      </Pressable> */}
 
       <Pressable onPress={() => router.push('/settings')} style={styles.boxSettings}>
         <ThemedText style={styles.boxText}>Settings</ThemedText>
