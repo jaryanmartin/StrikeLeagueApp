@@ -1,4 +1,4 @@
-// app/stores/bleStore.ts (or wherever you keep it)
+import { Device } from 'react-native-ble-plx';
 import { create } from 'zustand';
 
 export type BleState = {
@@ -7,16 +7,14 @@ export type BleState = {
   sideAngle: number | null;
   attackAngle: number | null;
   feedback: string | null;
-//   aiFeedback: string | null;
-//   logs: { timestamp: number; metrics: Record<string, number | null> }[];
+  connectedDevice: Device | null;
 
   setFaceAngle: (val: number) => void;
   setSwingPath: (val: number) => void;
   setSideAngle: (val: number) => void;
   setAttackAngle: (val: number) => void;
   setFeedback: (msg: string) => void;
-//   setAiFeedback: (msg: string) => void;
-//   addLog: () => void;
+  setConnectedDevice: (device: Device | null) => void;
 };
 
 export const useBleStore = create<BleState>((set, get) => ({
@@ -25,28 +23,13 @@ export const useBleStore = create<BleState>((set, get) => ({
   sideAngle: null,
   attackAngle: null,
   feedback: null,
-//   aiFeedback: null,
-//   logs: [],
+  connectedDevice: null,
 
   setFaceAngle: (val) => set({ faceAngle: val }),
   setSwingPath: (val) => set({ swingPath: val }),
   setSideAngle: (val) => set({ sideAngle: val }),
   setAttackAngle: (val) => set({ attackAngle: val }),
   setFeedback: (msg) => set({feedback: msg}),
-//   setAiFeedback: (msg) => set({ aiFeedback: msg }),
+  setConnectedDevice: (device) => set({ connectedDevice: device }),
 
-//   addLog: () => {
-//     const { faceAngle, swingPath, sideAngle, attackAngle, logs } = get();
-//     const timestamp = Date.now();
-//     const newLog = {
-//       timestamp,
-//       metrics: {
-//         faceAngle,
-//         swingPath,
-//         sideAngle,
-//         attackAngle,
-//       },
-//     };
-//     set({ logs: [...logs, newLog] });
-//   },
 }));
