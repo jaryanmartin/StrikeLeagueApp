@@ -6,7 +6,7 @@ import useBLE from '@/hooks/useBLE';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
-export default function SettingsScreen() {
+export default function CalibrationScreen() {
   const router = useRouter();
   const { turnOffLaunchMonitor } = useBLE();
   
@@ -20,36 +20,17 @@ export default function SettingsScreen() {
       </Pressable>
 
       <ThemedView style={styles.titleContainer}>
-        <ThemedText style={styles.titleText}>Settings</ThemedText>
+        <ThemedText style={styles.titleText}>Calibration</ThemedText>
       </ThemedView>
 
       <Pressable onPress={() => router.push('/ble')} style={styles.boxInitial}>
-        <ThemedText style={styles.boxText}>Connect Bluetooth</ThemedText>
+        <ThemedText style={styles.boxText}>Calibrate Lighting</ThemedText>
       </Pressable>
 
       <Pressable onPress={() => router.push('/calibration')} style={styles.boxCalibration}>
-        <ThemedText style={styles.boxText}>Calibration</ThemedText>
+        <ThemedText style={styles.boxText}>Calibrate Distance</ThemedText>
       </Pressable>
 
-      {/* <ThemedView style={styles.options}>
-        <ThemedText type='subtitle'>Units of Measurement:</ThemedText>
-      </ThemedView>
-
-      <ThemedView style={styles.options}>
-        <ThemedText type='subtitle'>Toggle Sound:</ThemedText>
-      </ThemedView>
-
-      <ThemedView style={styles.options}>
-        <ThemedText type='subtitle'>Light/Dark Mode:</ThemedText>
-      </ThemedView> */}
-
-      {/* <Pressable onPress={turnOffLaunchMonitor} style={styles.options}>
-        <ThemedText type='subtitle'>Power Off:</ThemedText>
-      </Pressable> */}
-
-      {/* <ThemedView style={styles.options}>
-        <ThemedText type='subtitle'>Log Out:</ThemedText>
-      </ThemedView> */}
 
     </ThemedView>
   );

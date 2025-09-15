@@ -8,6 +8,7 @@ export type BleState = {
   attackAngle: number | null;
   feedback: string | null;
   connectedDevice: Device | null;
+  time: Date | null,
 
   setFaceAngle: (val: number) => void;
   setSwingPath: (val: number) => void;
@@ -15,6 +16,7 @@ export type BleState = {
   setAttackAngle: (val: number) => void;
   setFeedback: (msg: string) => void;
   setConnectedDevice: (device: Device | null) => void;
+  setTime: (date: Date) => void;
 };
 
 export const useBleStore = create<BleState>((set, get) => ({
@@ -24,6 +26,7 @@ export const useBleStore = create<BleState>((set, get) => ({
   attackAngle: null,
   feedback: null,
   connectedDevice: null,
+  time: null,
 
   setFaceAngle: (val) => set({ faceAngle: val }),
   setSwingPath: (val) => set({ swingPath: val }),
@@ -31,5 +34,5 @@ export const useBleStore = create<BleState>((set, get) => ({
   setAttackAngle: (val) => set({ attackAngle: val }),
   setFeedback: (msg) => set({feedback: msg}),
   setConnectedDevice: (device) => set({ connectedDevice: device }),
-
+  setTime: (date) => set({time: date}),
 }));

@@ -16,8 +16,7 @@ import {
 const DATA_SERVICE_UUID = "96f0284d-8895-4c08-baaf-402a2f7e8c5b";
 const METRIC_CHARACTERISTIC_UUID = "d9c146d3-df83-49ec-801d-70494060d6d8";
 const FEEDBACK_CHARACTERISTIC_UUID = "2c58a217-0a9b-445f-adac-0b37bd8635c3";
-const LAUNCH_MONITOR_CHARACTERISTIC_UUID = "00000000-0000-0000-0000-000000000000";
-// const FACEANGLE_CHARACTERISTIC_UUID = "2c58a217-0a9b-445f-adac-0b37bd8635c3";
+const LAUNCH_MONITOR_CHARACTERISTIC_UUID = "449145fa-bad8-4b71-8094-44089b2c29b9";
 // const SWINGPATH_CHARACTERISTIC_UUID = "449145fa-bad8-4b71-8094-44089b2c29b9";
 // const SIDEANGLE_CHARACTERISTIC_UUID = "a019ec27-5acf-4128-8a12-435901fc07ca";
 // const ATTACKANGLE_CHARACTERISTIC_UUID = "712da68d-cc4e-423e-b818-3f4cdf3a712a";
@@ -28,7 +27,6 @@ const bleManager = new BleManager();
 
 function useBLE() {
   const [allDevices, setAllDevices] = useState<Device[]>([]);
-  // const [connectedDevice, setConnectedDevice] = useState<Device | null>(null);
   const connectedDevice = useBleStore((state) => state.connectedDevice);
   const setConnectedDevice = useBleStore((state) => state.setConnectedDevice);
   const {
@@ -37,6 +35,7 @@ function useBLE() {
   setSideAngle,
   setAttackAngle,
   setFeedback,
+  setTime,
 } = useBleStore.getState();
 
   const requestAndroid31Permissions = async () => {
@@ -153,7 +152,7 @@ function useBLE() {
     {
       try {
         const data = JSON.parse(raw);
-        // console.log("Received BLE data:", data);
+        console.log("Received BLE data:", data);
 
         if (typeof data["face angle"] === "number") {
           setFaceAngle(data["face angle"]);
@@ -170,6 +169,10 @@ function useBLE() {
         if (typeof data["side angle"] === "number") {
           setSideAngle(data["side angle"]);
         }
+
+        setTime(new Date());
+
+
       } catch (err) {
         console.error("Failed to parse BLE JSON:", err);
       }

@@ -14,6 +14,10 @@ export default function MetricScreen() {
   const swingPath = useBleStore((state: BleState) => state.swingPath);
   const sideAngle = useBleStore((state: BleState) => state.sideAngle);
   const attackAngle = useBleStore((state: BleState) => state.attackAngle);
+  const time = useBleStore((state: BleState) => state.time);
+
+  const feedback = useBleStore((state: BleState) => state.feedback);
+  const { readFeedback } = useBLE();
 
   const {
     startRecord,
@@ -29,7 +33,7 @@ export default function MetricScreen() {
       </Pressable>
 
       <ThemedView style={styles.titleContainer}>
-        <ThemedText style={styles.titleText}>Swing Metrics</ThemedText>
+        <ThemedText style={styles.titleText}>Swing Analytics</ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.faceAngle}>
@@ -48,9 +52,25 @@ export default function MetricScreen() {
           <ThemedText type={'subtitle'}>Attack Angle: {attackAngle !== null ? `${attackAngle}°` : "Waiting..."}</ThemedText>
       </ThemedView>
 
+      <ThemedView style={styles.time}>
+          <ThemedText type={'subtitle'}> {time !== null ? `${time.toLocaleString()}` : "Waiting..."}</ThemedText>
+      </ThemedView>
+
       {/* <View style={styles.scanControls}>
         <Button title="Start Recording" onPress={startRecord} />
       </View> */}
+
+      {/* <ThemedView style={styles.problem}>
+        <ThemedText type='subtitle'>Problem Identified: {problem !== null ? `${problem}` : "Waiting..."}</ThemedText>
+      </ThemedView> */}
+
+      <ThemedView style={styles.feedback}>
+        <ThemedText type='subtitle'>Feedback: {feedback !== null ? `${feedback}` : "Waiting..."}</ThemedText>
+      </ThemedView>
+
+      <Pressable onPress={readFeedback} style={styles.readButton}>
+        <Ionicons name="refresh" size={28} color="white" />
+      </Pressable>
 
     </ThemedView>
   );
@@ -79,11 +99,16 @@ const styles = StyleSheet.create({
     color: 'white',
     right: 75,
     bottom: 15,
-    marginTop: 120,
+    marginTop: 60,
 },
   options: {
     color: 'white',
     right: 75,
+    bottom: 15,
+    marginTop: 30,
+},
+  time: {
+    right: 0,
     bottom: 15,
     marginTop: 90,
 },
@@ -102,5 +127,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginVertical: 20,
+  },
+  feedback: {
+    textAlign: 'center',
+    color: 'white',
+    right: 75,
+    bottom: 40,
+    marginTop: 120,
+},
+  readButton: {
+    position: 'absolute',
+    right: 190,
+    bottom: 100,
   },
 });

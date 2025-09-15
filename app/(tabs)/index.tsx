@@ -21,12 +21,12 @@ export default function HomeScreen() {
       </ThemedView>
 
       <Pressable onPress={() => router.push('/metrics')} style={styles.boxInitial}>
-        <ThemedText style={styles.boxText}>Swing Metrics</ThemedText>
+        <ThemedText style={styles.boxText}>Swing Analytics</ThemedText>
       </Pressable>
 
-      <Pressable onPress={() => router.push('/feedback')} style={styles.boxFeedback}>
+      {/* <Pressable onPress={() => router.push('/feedback')} style={styles.boxFeedback}>
         <ThemedText style={styles.boxText}>Swing Feedback</ThemedText>
-      </Pressable>
+      </Pressable> */}
 
       {/* <Pressable onPress={() => router.push('/history')} style={styles.boxHistory}>
         <ThemedText style={styles.boxText}>History Logs</ThemedText>
