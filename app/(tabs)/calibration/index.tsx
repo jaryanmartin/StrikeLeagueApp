@@ -13,7 +13,7 @@ export default function CalibrationScreen() {
      <ThemedView style={{ flex: 1, padding: 100 }}>
       <Pressable onPress={() => {
         console.log('Back pressed');
-        router.back();
+        router.push('/settings');
       }} style={styles.backIcon}>
         <Ionicons name="arrow-back" size={28} color="white" />
       </Pressable>
@@ -29,7 +29,7 @@ export default function CalibrationScreen() {
       </Pressable>
 
       <Pressable
-        onPress={() => router.push('/calibration')}
+        onPress={() => router.push('/calibration/distance_wait')}
         style={styles.boxCalibration}>
         <ThemedText style={styles.boxText}>Calibrate Distance</ThemedText>
       </Pressable>

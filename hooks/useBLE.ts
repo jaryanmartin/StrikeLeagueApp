@@ -392,6 +392,53 @@ function useBLE() {
     };
   };
 
+  const monitorDistanceCalibration = (
+    onValue: (value: string) => void,
+    onError?: (error: BleError | Error) => void,
+  ) => {
+    if (!connectedDevice) {
+      console.error("No device connected.");
+      return () => {};
+    }
+
+    let subscription: Subscription | null = null;
+
+    try {
+      subscription = bleManager.monitorCharacteristicForDevice(
+        connectedDevice.id,
+        DATA_SERVICE_UUID,
+        DISTANCE_CHARACTERISTIC_UUID,
+        (error, characteristic) => {
+          if (error) {
+            console.error("Distance calibration monitor error:", error);
+            onError?.(error);
+            return;
+          }
+
+          if (!characteristic?.value) {
+            return;
+          }
+
+          const value = Buffer.from(characteristic.value, 'base64').toString('utf-8');
+          onValue(value);
+        }
+      );
+    } catch (error) {
+      console.error("Failed to start distance calibration monitor:", error);
+      if (onError && error instanceof Error) {
+        onError(error);
+      }
+    }
+
+    return () => {
+      try {
+        subscription?.remove();
+      } catch (error) {
+        console.warn("Failed to stop distance calibration monitor:", error);
+      }
+    };
+  };
+
   const turnOffLaunchMonitor = async () => {
     if (!connectedDevice) {
       console.error("No device connected.");
@@ -428,6 +475,7 @@ function useBLE() {
     calibrateLighting,
     calibrateDistance,
     monitorLightingCalibration,
+    monitorDistanceCalibration,
   };
 }
 
