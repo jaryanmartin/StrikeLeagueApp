@@ -11,6 +11,7 @@ import {
   BleManager,
   Characteristic,
   Device,
+  Subscription
 } from "react-native-ble-plx";
 
 const DATA_SERVICE_UUID = "96f0284d-8895-4c08-baaf-402a2f7e8c5b";
@@ -344,6 +345,53 @@ function useBLE() {
     }
   };
 
+  const monitorLightingCalibration = (
+    onValue: (value: string) => void,
+    onError?: (error: BleError | Error) => void,
+  ) => {
+    if (!connectedDevice) {
+      console.error("No device connected.");
+      return () => {};
+    }
+
+    let subscription: Subscription | null = null;
+
+    try {
+      subscription = bleManager.monitorCharacteristicForDevice(
+        connectedDevice.id,
+        DATA_SERVICE_UUID,
+        LIGHTING_CHARACTERISTIC_UUID,
+        (error, characteristic) => {
+          if (error) {
+            console.error("Lighting calibration monitor error:", error);
+            onError?.(error);
+            return;
+          }
+
+          if (!characteristic?.value) {
+            return;
+          }
+
+          const value = Buffer.from(characteristic.value, 'base64').toString('utf-8');
+          onValue(value);
+        }
+      );
+    } catch (error) {
+      console.error("Failed to start lighting calibration monitor:", error);
+      if (onError && error instanceof Error) {
+        onError(error);
+      }
+    }
+
+    return () => {
+      try {
+        subscription?.remove();
+      } catch (error) {
+        console.warn("Failed to stop lighting calibration monitor:", error);
+      }
+    };
+  };
+
   const turnOffLaunchMonitor = async () => {
     if (!connectedDevice) {
       console.error("No device connected.");
@@ -379,6 +427,7 @@ function useBLE() {
     turnOffLaunchMonitor,
     calibrateLighting,
     calibrateDistance,
+    monitorLightingCalibration,
   };
 }
 
