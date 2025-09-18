@@ -1,10 +1,9 @@
-import { Pressable, StyleSheet } from 'react-native';
-
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import useBLE from '@/hooks/useBLE';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { Pressable, StyleSheet } from 'react-native';
 
 export default function CalibrationScreen() {
   const router = useRouter();

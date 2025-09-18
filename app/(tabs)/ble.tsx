@@ -15,7 +15,8 @@ export default function BluetoothScreen() {
     allDevices,
     connectToDevice,
     connectedDevice,
-    startRecord
+    startRecord,
+    
   } = useBLE();
 
   useEffect(() => {
@@ -58,12 +59,10 @@ export default function BluetoothScreen() {
         </View>
       )}
 
-      <View style={styles.scanControls}>
+      <View style={styles.startButton}>
         <Button title="Start Recording" onPress={startRecord} />
       </View>
     </ThemedView>
-
-    
   );
 }
 
@@ -119,6 +118,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginVertical: 20,
+  },
+  startButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 20,
+    left: 35,
+    bottom: 40,
   },
   sectionTitle: {
     fontSize: 18,
