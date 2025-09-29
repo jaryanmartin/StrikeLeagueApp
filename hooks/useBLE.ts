@@ -21,10 +21,6 @@ const LAUNCH_MONITOR_CHARACTERISTIC_UUID = "449145fa-bad8-4b71-8094-44089b2c29b9
 const LIGHTING_CHARACTERISTIC_UUID = "712da68d-cc4e-423e-b818-3f4cdf3a712a";
 const DISTANCE_CHARACTERISTIC_UUID = "a019ec27-5acf-4128-8a12-435901fc07ca";
 
-// const SWINGPATH_CHARACTERISTIC_UUID = "449145fa-bad8-4b71-8094-44089b2c29b9";
-// const SIDEANGLE_CHARACTERISTIC_UUID = "a019ec27-5acf-4128-8a12-435901fc07ca";
-// const ATTACKANGLE_CHARACTERISTIC_UUID = "712da68d-cc4e-423e-b818-3f4cdf3a712a";
-
 const VIRTUAL_DEVICE_NAME = "Company17_Rpi5"; 
 
 const bleManager = new BleManager();
@@ -184,29 +180,6 @@ function useBLE() {
       {
         setFeedback(raw);
       }
-
-
-
-    // react-native-ble-plx converts raw data from peripheral into base64
-    // const raw = Buffer.from(characteristic.value, 'base64');
-    // const metricValue = raw.readInt16LE(0);
-
-    // if (characteristic.uuid == FACEANGLE_CHARACTERISTIC_UUID)
-    // {
-    //   setFaceAngle(metricValue);
-    // }
-    // else if (characteristic.uuid == SWINGPATH_CHARACTERISTIC_UUID)
-    // {
-    //   setSwingPath(metricValue);
-    // }
-    // else if ( characteristic.uuid == SIDEANGLE_CHARACTERISTIC_UUID)
-    // {
-    //   setSideAngle(metricValue);
-    // }
-    // else if (characteristic.uuid == ATTACKANGLE_CHARACTERISTIC_UUID)
-    // {
-    //   setAttackAngle(metricValue);
-    // }
   };
 
   const startStreamingData = async (device: Device) => {
@@ -217,36 +190,6 @@ function useBLE() {
         METRIC_CHARACTERISTIC_UUID, 
         onDataUpdate
       );
-
-      // device.monitorCharacteristicForService(
-      //   DATA_SERVICE_UUID,
-      //   FEEDBACK_CHARACTERISTIC_UUID,
-      //   onDataUpdate
-      // );
-
-      // device.monitorCharacteristicForService(
-      //   DATA_SERVICE_UUID,
-      //   FACEANGLE_CHARACTERISTIC_UUID, 
-      //   onDataUpdate
-      // );
-
-      // device.monitorCharacteristicForService(
-      //   DATA_SERVICE_UUID,
-      //   SWINGPATH_CHARACTERISTIC_UUID, 
-      //   onDataUpdate
-      // );
-
-      // device.monitorCharacteristicForService(
-      //   DATA_SERVICE_UUID,
-      //   SIDEANGLE_CHARACTERISTIC_UUID, 
-      //   onDataUpdate
-      // );
-
-      // device.monitorCharacteristicForService(
-      //   DATA_SERVICE_UUID,
-      //   ATTACKANGLE_CHARACTERISTIC_UUID, 
-      //   onDataUpdate
-      // );
 
     } else {
       console.log("No Device Connected");

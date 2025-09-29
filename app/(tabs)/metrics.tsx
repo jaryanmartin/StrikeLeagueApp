@@ -5,7 +5,37 @@ import type { BleState } from '@/stores/bleStores';
 import { useBleStore } from '@/stores/bleStores';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useMemo } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
+
+const formatMetricValue = (value: number | null, suffix?: string) => {
+  if (value === null || value === undefined) {
+    return 'Waiting…';
+  }
+
+  return `${value}${suffix ?? ''}`;
+};
+
+const safeLocaleString = (value: Date | string | number | null | undefined) => {
+  if (!value) {
+    return null;
+  }
+
+  if (value instanceof Date) {
+    return value.toLocaleString();
+  }
+
+  try {
+    const dateValue = new Date(value);
+    if (!Number.isNaN(dateValue.getTime())) {
+      return dateValue.toLocaleString();
+    }
+  } catch {
+    // Swallow formatting errors and fall through to returning the raw value.
+  }
+
+  return String(value);
+};
 
 export default function MetricScreen() {
   const router = useRouter();
@@ -19,125 +49,130 @@ export default function MetricScreen() {
   const feedback = useBleStore((state: BleState) => state.feedback);
   const { readFeedback } = useBLE();
 
-  const {
-    startRecord,
-  } = useBLE();
+  const metrics = [
+    { label: 'Face Angle', value: formatMetricValue(faceAngle, '°') },
+    { label: 'Swing Path', value: formatMetricValue(swingPath, '°') },
+    { label: 'Side Angle', value: formatMetricValue(sideAngle, '°') },
+    { label: 'Attack Angle', value: formatMetricValue(attackAngle, '°') },
+  ];
 
+  const formattedTimestamp = useMemo(() => safeLocaleString(time), [time]);
 
   return (
-     <ThemedView style={{ flex: 1, padding: 100 }}>
-      <Pressable onPress={() => {
-        router.back();
-      }} style={styles.backIcon}>
+
+    <ThemedView style={styles.container}>
+      <Pressable
+        onPress={() => {
+          router.back();
+        }}
+        style={styles.backIcon}
+        accessibilityLabel="Go back">
         <Ionicons name="arrow-back" size={28} color="white" />
       </Pressable>
 
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText style={styles.titleText}>Swing Analytics</ThemedText>
+      <ThemedText style={styles.titleText}>Swing Analytics</ThemedText>
+
+      <ThemedView style={styles.feedbackCard}>
+        <ThemedText style={styles.sectionLabel} type="subtitle">
+          Feedback
+        </ThemedText>
+        <ThemedText style={styles.feedbackText}>
+          {feedback ?? 'Waiting…'}
+        </ThemedText>
+        {formattedTimestamp ? (
+          <ThemedText style={styles.timestamp}>
+            Last updated {formattedTimestamp}
+          </ThemedText>
+        ) : null}
+        <Pressable onPress={readFeedback} style={styles.refreshButton} accessibilityLabel="Refresh feedback">
+          <Ionicons name="refresh" size={20} color="white" />
+          <ThemedText style={styles.refreshLabel}>Refresh</ThemedText>
+        </Pressable>
       </ThemedView>
 
-      <ThemedView style={styles.faceAngle}>
-          <ThemedText type={'subtitle'}>Face Angle: {faceAngle !== null ? `${faceAngle}°` : "Waiting..."}</ThemedText>
+      <ThemedView style={styles.metricsGrid}>
+        {metrics.map((metric) => (
+          <ThemedView key={metric.label} style={styles.metricCard}>
+            <ThemedText style={styles.metricLabel}>{metric.label}</ThemedText>
+            <ThemedText style={styles.metricValue}>{metric.value}</ThemedText>
+          </ThemedView>
+        ))}
       </ThemedView>
-
-      <ThemedView style={styles.options}>
-          <ThemedText type={'subtitle'}>Swing Path: {swingPath !== null ? `${swingPath}°` : "Waiting..."}</ThemedText>
-      </ThemedView>
-
-      <ThemedView style={styles.options}>
-          <ThemedText type={'subtitle'}>Side Angle: {sideAngle !== null ? `${sideAngle}°` : "Waiting..."}</ThemedText>
-      </ThemedView>
-
-      <ThemedView style={styles.options}>
-          <ThemedText type={'subtitle'}>Attack Angle: {attackAngle !== null ? `${attackAngle}°` : "Waiting..."}</ThemedText>
-      </ThemedView>
-
-      <ThemedView style={styles.time}>
-          <ThemedText type={'subtitle'}> {time !== null ? `${time.toLocaleString()}` : "Waiting..."}</ThemedText>
-      </ThemedView>
-
-      {/* <View style={styles.scanControls}>
-        <Button title="Start Recording" onPress={startRecord} />
-      </View> */}
-
-      {/* <ThemedView style={styles.problem}>
-        <ThemedText type='subtitle'>Problem Identified: {problem !== null ? `${problem}` : "Waiting..."}</ThemedText>
-      </ThemedView> */}
-
-      <ThemedView style={styles.feedback}>
-        <ThemedText type='subtitle'>Feedback: {feedback !== null ? `${feedback}` : "Waiting..."}</ThemedText>
-      </ThemedView>
-
-      <Pressable onPress={readFeedback} style={styles.readButton}>
-        <Ionicons name="refresh" size={28} color="white" />
-      </Pressable>
 
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 500,
-    right: 100,
-    top: 25,
-  },
-  titleText: {
-    fontSize: 45,
-    lineHeight: 56,
-    textAlign: 'center',
-    fontFamily: 'StrikeLeagueBold',
-    color: 'white',
-    flexWrap: 'nowrap',
-    right: 40,
-    bottom: 15,
-},
-  faceAngle: {
-    textAlign: 'center',
-    color: 'white',
-    right: 75,
-    bottom: 15,
-    marginTop: 60,
-},
-  options: {
-    color: 'white',
-    right: 75,
-    bottom: 15,
-    marginTop: 30,
-},
-  time: {
-    right: 0,
-    bottom: 15,
-    marginTop: 90,
-},
-  boxText: {
-    fontSize: 20,
-    fontWeight: '500',
-    color: 'black',
+
+  container: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 80,
   },
   backIcon: {
-    right: 350,
-    bottom: 830,
     position: 'absolute',
-    tintColor: 'white',
+    left: 24,
+    top: 40,
+    padding: 8,
   },
-  scanControls: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: 20,
-  },
-  feedback: {
+  titleText: {
+    fontSize: 40,
+    fontFamily: 'StrikeLeagueBold',
     textAlign: 'center',
     color: 'white',
-    right: 75,
-    bottom: 40,
-    marginTop: 120,
-},
-  readButton: {
-    position: 'absolute',
-    right: 190,
-    bottom: 100,
+    marginBottom: 32,
+    lineHeight: 55,
+  },
+  feedbackCard: {
+    borderRadius: 20,
+    padding: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    marginBottom: 20,
+    marginTop: 50,
+  },
+  sectionLabel: {
+    marginBottom: 12,
+  },
+  feedbackText: {
+    fontSize: 18,
+    lineHeight: 24,
+    marginBottom: 16,
+  },
+  timestamp: {
+    fontSize: 14,
+    opacity: 0.7,
+  },
+  refreshButton: {
+    marginTop: 16,
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    left: 100,
+  },
+  refreshLabel: {
+    marginLeft: 8,
+    fontSize: 16,
+  },
+  metricsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  metricCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    flexBasis: '48%',
+  },
+  metricLabel: {
+    fontSize: 16,
+    opacity: 0.7,
+    marginBottom: 8,
+  },
+  metricValue: {
+    fontSize: 24,
+    fontFamily: 'StrikeLeagueBold',
   },
 });
