@@ -21,7 +21,7 @@ const LAUNCH_MONITOR_CHARACTERISTIC_UUID = "449145fa-bad8-4b71-8094-44089b2c29b9
 const LIGHTING_CHARACTERISTIC_UUID = "712da68d-cc4e-423e-b818-3f4cdf3a712a";
 const DISTANCE_CHARACTERISTIC_UUID = "a019ec27-5acf-4128-8a12-435901fc07ca";
 
-const VIRTUAL_DEVICE_NAME = "Company17_Rpi5"; 
+const VIRTUAL_DEVICE_NAME = "Company17_Rpi"; 
 
 const bleManager = new BleManager();
 
@@ -36,6 +36,7 @@ function useBLE() {
   setAttackAngle,
   setFeedback,
   setTime,
+  // setLightingCalibrated,
 } = useBleStore.getState();
 
   const requestAndroid31Permissions = async () => {
@@ -201,11 +202,19 @@ function useBLE() {
 };
 
   const startRecord = async() => {
-   
     if (!connectedDevice) {
-    console.error("No device connected.");
-    return;
-  }
+      console.error("No device connected.");
+      return;
+    }
+
+    // const { isLightingCalibrated } = useBleStore.getState();
+    // if (!isLightingCalibrated) {
+    //   Alert.alert(
+    //     "Calibrate lighting",
+    //     "Please calibrate the lighting before starting a recording."
+    //   );
+    //   return;
+    // }
 
   const message = "A";
   const base64 = Buffer.from(message, 'utf-8').toString('base64');
@@ -226,9 +235,9 @@ function useBLE() {
   const calibrateLighting = async() => {
    
     if (!connectedDevice) {
-    console.error("No device connected.");
-    return;
-  }
+      console.error("No device connected.");
+      return;
+    }
 
   const message = "B";
   const base64 = Buffer.from(message, 'utf-8').toString('base64');
@@ -248,7 +257,7 @@ function useBLE() {
 
   const calibrateDistance = async() => {
    
-    if (!connectedDevice) {
+  if (!connectedDevice) {
     console.error("No device connected.");
     return;
   }
@@ -263,9 +272,11 @@ function useBLE() {
       DISTANCE_CHARACTERISTIC_UUID,
       base64
     );
-    console.log("START command sent.");
+    // setLightingCalibrated(true);
+    console.log("Lighting calibration command sent.");
     } catch (error) {
-      console.error("Failed to send START:", error);
+      console.error("Failed to send lighting calibration command:", error);
+      // setLightingCalibrated(false);
     }
   };
 
