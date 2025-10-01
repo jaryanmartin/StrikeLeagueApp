@@ -50,7 +50,14 @@ function MetricCardComponent({
   isLoading,
 }: MetricCardProps) {
   const statusStyles = STATUS_STYLES[status];
-  const sanitizedLabel = useMemo(() => label.toLowerCase().replace(/[^a-z0-9]+/g, '-'), [label]);
+  const sanitizedLabel = useMemo(() => {
+    if (!label) {
+      console.warn('MetricCard: `label` prop is required. Using fallback identifier.');
+    }
+
+    const normalizedLabel = label ? label.toLowerCase() : 'metric-card';
+    return normalizedLabel.replace(/[^a-z0-9]+/g, '-');
+  }, [label]);
   const gaugeGradientId = useMemo(() => `gaugeGradient-${sanitizedLabel}`, [sanitizedLabel]);
   const sparkGradientId = useMemo(() => `sparkGradient-${sanitizedLabel}`, [sanitizedLabel]);
 
