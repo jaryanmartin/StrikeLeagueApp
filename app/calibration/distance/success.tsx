@@ -13,7 +13,7 @@ export default function DistanceCalibrationSuccessScreen() {
       <ThemedText style={styles.message}>
         Your distance calibration finished successfully. You can return to the home screen to continue.
       </ThemedText>
-      <Pressable style={styles.actionButton} onPress={() => router.replace('/')}>
+      <Pressable style={styles.actionButton} onPress={() => router.replace('/calibration')}>
         <ThemedText style={styles.actionButtonText}>Okay</ThemedText>
       </Pressable>
     </ThemedView>

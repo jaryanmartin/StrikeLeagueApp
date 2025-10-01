@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/ThemedText';
@@ -36,45 +36,35 @@ const isSuccessValue = (raw: string) => {
   return false;
 };
 
-export default function DistanceCalibrationWaitScreen() {
+export default function LightingCalibrationWaitScreen() {
   const router = useRouter();
-  const { monitorDistanceCalibration, calibrateDistance, connectedDevice } = useBLE();
+  const { monitorLightingCalibration, connectedDevice } = useBLE();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const hasStartedCalibration = useRef(false);
 
   useEffect(() => {
     if (!connectedDevice) {
-      hasStartedCalibration.current = false;
       return undefined;
     }
 
     setErrorMessage(null);
 
-    if (!hasStartedCalibration.current) {
-      hasStartedCalibration.current = true;
-      void calibrateDistance();
-    }
-
-    const unsubscribe = monitorDistanceCalibration(
+    const unsubscribe = monitorLightingCalibration(
       (value) => {
         if (isSuccessValue(value)) {
-          router.replace('/calibration/distance_success');
+          router.replace('/calibration/lighting/success');
         }
       },
       () => {
-        setErrorMessage('Unable to monitor distance calibration.');
+        setErrorMessage('Unable to monitor lighting calibration.');
       },
     );
 
-    return () => {
-      hasStartedCalibration.current = false;
-      unsubscribe();
-    };
-  }, [calibrateDistance, connectedDevice, monitorDistanceCalibration, router]);
+    return unsubscribe;
+  }, [connectedDevice, monitorLightingCalibration, router]);
 
   const statusText = useMemo(() => {
     if (!connectedDevice) {
-      return 'Please allow your Strike League device to finish distance calibration.';
+      return 'Please allow your Strike League device to finish lighting calibration.';
     }
 
     if (errorMessage) {
@@ -86,14 +76,14 @@ export default function DistanceCalibrationWaitScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText style={styles.title}>Calibrating Distance. Please Wait!</ThemedText>
+      <ThemedText style={styles.title}>Calibrating Lighting. Please Wait!</ThemedText>
       <ActivityIndicator style={styles.spinner} color="white" size="large" />
       <ThemedText style={styles.status}>
         {statusText}
       </ThemedText>
       <Pressable
         style={[styles.actionButton, styles.cancelButton]}
-        onPress={() => router.replace('/calibration')}>
+        onPress={() => router.replace('/calibration/lighting')}>
         <ThemedText style={styles.actionButtonText}>Cancel</ThemedText>
       </Pressable>
     </ThemedView>

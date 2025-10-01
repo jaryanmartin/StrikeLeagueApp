@@ -4,10 +4,12 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
+import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const palette = Colors[colorScheme ?? 'light'];
   const [loaded] = useFonts({
     StrikeLeagueTitle: require('../assets/fonts/StrikeLeagueTitle.ttf'),
     StrikeLeagueBold: require('../assets/fonts/CosmicBold.ttf'),
@@ -22,6 +24,23 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="ble"
+          options={{
+            title: 'Bluetooth Pairing',
+            presentation: 'modal',
+            headerTintColor: palette.text,
+            headerStyle: { backgroundColor: palette.surface },
+            headerBackTitle: 'Settings',
+          }}
+        />
+        <Stack.Screen
+          name="calibration"
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+          }}
+        />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />

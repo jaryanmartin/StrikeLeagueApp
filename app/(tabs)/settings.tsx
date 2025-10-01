@@ -2,22 +2,13 @@ import { Pressable, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import useBLE from '@/hooks/useBLE';
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { turnOffLaunchMonitor } = useBLE();
-  
+
   return (
-     <ThemedView style={{ flex: 1, padding: 100 }}>
-      <Pressable onPress={() => {
-        console.log('Back pressed');
-        router.back();
-      }} style={styles.backIcon}>
-        <Ionicons name="arrow-back" size={28} color="white" />
-      </Pressable>
+    <ThemedView style={{ flex: 1, padding: 100 }}>
 
       <ThemedView style={styles.titleContainer}>
         <ThemedText style={styles.titleText}>Settings</ThemedText>
@@ -109,12 +100,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '500',
     color: 'black',
-  },
-  backIcon: {
-    right: 350,
-    bottom: 830,
-    position: 'absolute',
-    tintColor: 'white',
   },
   boxHistory: {
     marginTop: 30,

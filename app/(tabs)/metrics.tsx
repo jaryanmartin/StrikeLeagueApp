@@ -4,7 +4,6 @@ import useBLE from '@/hooks/useBLE';
 import type { BleState } from '@/stores/bleStores';
 import { useBleStore } from '@/stores/bleStores';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 
@@ -38,7 +37,6 @@ const safeLocaleString = (value: Date | string | number | null | undefined) => {
 };
 
 export default function MetricScreen() {
-  const router = useRouter();
   
   const faceAngle = useBleStore((state: BleState) => state.faceAngle);
   const swingPath = useBleStore((state: BleState) => state.swingPath);
@@ -61,14 +59,6 @@ export default function MetricScreen() {
   return (
 
     <ThemedView style={styles.container}>
-      <Pressable
-        onPress={() => {
-          router.back();
-        }}
-        style={styles.backIcon}
-        accessibilityLabel="Go back">
-        <Ionicons name="arrow-back" size={28} color="white" />
-      </Pressable>
 
       <ThemedText style={styles.titleText}>Swing Analytics</ThemedText>
 
@@ -109,12 +99,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     paddingTop: 80,
-  },
-  backIcon: {
-    position: 'absolute',
-    left: 24,
-    top: 40,
-    padding: 8,
   },
   titleText: {
     fontSize: 40,

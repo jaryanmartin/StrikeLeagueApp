@@ -127,16 +127,10 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: 'black',
   },
-  backIcon: {
-    right: 350,
-    bottom: 830,
-    position: 'absolute',
-    tintColor: 'white',
-  },
   container: {
     flex: 1,
-    paddingTop: 100,
-    paddingHorizontal: 20,
+    paddingTop: 80,
+    paddingHorizontal: 24,
   },
   scanControls: {
     flexDirection: 'row',
