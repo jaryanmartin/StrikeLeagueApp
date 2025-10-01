@@ -1,13 +1,15 @@
 import { memo, useEffect, useRef } from 'react';
 import { Animated, Easing, StyleSheet, ViewStyle } from 'react-native';
 
+type SkeletonWidth = number | `${number}%` | 'auto';
+
 interface SkeletonLoaderProps {
-  width?: number | string;
+  width?: SkeletonWidth;
   height?: number;
   borderRadius?: number;
   style?: ViewStyle;
 }
-const DEFAULT_WIDTH = '100%';
+const DEFAULT_WIDTH: SkeletonWidth = '100%';
 const DEFAULT_HEIGHT = 20;
 const DEFAULT_RADIUS = 12;
 
