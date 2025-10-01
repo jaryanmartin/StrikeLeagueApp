@@ -1,124 +1,136 @@
-import { Image } from 'expo-image';
-import { StyleSheet } from 'react-native';
-
+import { GradientOverlay } from '@/components/GradientOverlay';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { Pressable } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 export default function HomeScreen() {
   const router = useRouter();
+
+  const colorScheme = useColorScheme() ?? 'light';
+  const palette = Colors[colorScheme];
   
   return (
-     <ThemedView style={{ flex: 1, padding: 100 }}>
-      <Image
-        source={require('@/assets/images/strike.png')}
-        style={styles.reactLogo}
-      />
+    <ThemedView style={[styles.container, { backgroundColor: 'transparent' }]}> 
+      <GradientOverlay colors={palette.heroGradient} />
 
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText style={styles.titleText}>STRIKE LEAGUE</ThemedText>
-      </ThemedView>
+      <View style={styles.heroSection}>
+        <GradientOverlay
+          colors={[`${palette.accent}1A`, 'transparent']}
+          style={styles.heroGlow}
+          start={{ x: 0.2, y: 0 }}
+          end={{ x: 0.8, y: 1 }}
+          pointerEvents="none"
+        />
+        <Image source={require('@/assets/images/strike.png')} style={styles.logo} />
+        <ThemedText type="title" style={styles.titleText}>
+          Strike League
+        </ThemedText>
+        <ThemedText style={styles.subtitle} type="subtitle">
+          Track every swing with precision metrics and tailored insights.
+        </ThemedText>
+      </View>
 
-      <Pressable onPress={() => router.push('/metrics')} style={styles.boxInitial}>
-        <ThemedText style={styles.boxText}>Swing Analytics</ThemedText>
-      </Pressable>
+      <View style={styles.actionSection}>
+        <Pressable
+          onPress={() => router.push('/metrics')}
+          style={[
+            styles.primaryAction,
+            {
+              backgroundColor: palette.accent,
+              shadowColor: colorScheme === 'dark' ? '#000000' : palette.accent,
+            },
+          ]}
+          accessibilityLabel="Open swing analytics">
+          <ThemedText
+            type="defaultSemiBold"
+            style={styles.actionLabel}
+            lightColor={Colors.light.background}
+            darkColor={Colors.dark.background}>
+            Swing Analytics
+          </ThemedText>
+        </Pressable>
 
-      {/* <Pressable onPress={() => router.push('/feedback')} style={styles.boxFeedback}>
-        <ThemedText style={styles.boxText}>Swing Feedback</ThemedText>
-      </Pressable> */}
-
-      {/* <Pressable onPress={() => router.push('/history')} style={styles.boxHistory}>
-        <ThemedText style={styles.boxText}>History Logs</ThemedText>
-      </Pressable> */}
-
-      <Pressable onPress={() => router.push('/settings')} style={styles.boxSettings}>
-        <ThemedText style={styles.boxText}>Settings</ThemedText>
-      </Pressable>
+        <Pressable
+          onPress={() => router.push('/settings')}
+          style={[
+            styles.secondaryAction,
+            {
+              backgroundColor: palette.surface,
+              borderColor: palette.surfaceMuted,
+            },
+          ]}
+          accessibilityLabel="Open settings">
+          <ThemedText type="defaultSemiBold" style={styles.actionLabel}>
+            Settings
+          </ThemedText>
+        </Pressable>
+      </View>
 
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'column',
+  container: {
+    flex: 1,
+    paddingTop: 72,
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+    justifyContent: 'space-between',
+  },
+  heroSection: {
     alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'visible',
-    width: 300,
+    marginTop: 16,
+    paddingBottom: 24,
+  },
+  heroGlow: {
+    position: 'absolute',
+    top: -120,
+    left: -120,
+    right: -120,
+    height: 320,
+    borderRadius: 240,
+  },
+  logo: {
+    height: 160,
+    width: 160,
+    marginBottom: 16,
   },
   titleText: {
-    fontSize: 70,
-    lineHeight: 76,
+    textTransform: 'uppercase',
+    letterSpacing: 6,
     textAlign: 'center',
-    fontFamily: 'StrikeLeagueBold',
-    color: 'white',
-    right: 40,
-    bottom: 15,
+    // fontFamily: 'StrikeLeagueBold',
 },
-  boxInitial: {
-    marginTop: 225,
-    borderRadius: 20,
-    borderWidth: 3,
-    borderColor: 'black',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    marginVertical: 10,
+  subtitle: {
+    maxWidth: 320,
+    textAlign: 'center',
+    opacity: 0.85,
+  },
+  actionSection: {
+    gap: 16,
+  },
+  primaryAction: {
+    borderRadius: 22,
+    paddingVertical: 20,
     alignItems: 'center',
-    width: 350,
-    alignSelf: 'center',
-    backgroundColor: '#C7F9CC',
+    shadowOpacity: 0.35,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 6,
   },
-  boxFeedback: {
-    marginTop: 30,
+  secondaryAction: {
     borderRadius: 20,
-    borderWidth: 3,
-    borderColor: 'black',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    marginVertical: 10,
+    paddingVertical: 18,
     alignItems: 'center',
-    width: 350,
-    alignSelf: 'center',
-    backgroundColor: '#CFE4FF',
+    borderWidth: 1,
   },
-  boxHistory: {
-    marginTop: 30,
-    borderRadius: 20,
-    borderWidth: 3,
-    borderColor: 'black',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    marginVertical: 10,
-    alignItems: 'center',
-    width: 350,
-    alignSelf: 'center',
-    backgroundColor: '#FFD9D9',
-  },
-  boxSettings: {
-    marginTop: 30,
-    borderRadius: 20,
-    borderWidth: 3,
-    borderColor: 'black',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    marginVertical: 10,
-    alignItems: 'center',
-    width: 350,
-    alignSelf: 'center',
-    backgroundColor: '#E5DEFF',
-  },
-  boxText: {
-    fontSize: 20,
-    fontWeight: '500',
-    color: 'black',
-  },
-  reactLogo: {
-    height: 150,
-    width: 150,
-    bottom: 505 ,
-    left: 140,
-    position: 'absolute',
+  actionLabel: {
+    fontSize: 18,
+    letterSpacing: 0.3,
   },
 });
