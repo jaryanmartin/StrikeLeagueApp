@@ -3,7 +3,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { Ionicons } from '@expo/vector-icons';
 import { memo, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Svg, { Circle, Defs, LinearGradient, Path, Polyline, Stop } from 'react-native-svg';
+import Svg, { Circle, Path, Polyline } from 'react-native-svg';
 import SkeletonLoader from './SkeletonLoader';
 
 type MetricStatus = 'positive' | 'negative' | 'neutral';
@@ -50,17 +50,6 @@ function MetricCardComponent({
   isLoading,
 }: MetricCardProps) {
   const statusStyles = STATUS_STYLES[status];
-  const sanitizedLabel = useMemo(() => {
-    if (!label) {
-      console.warn('MetricCard: `label` prop is required. Using fallback identifier.');
-    }
-
-    const normalizedLabel = label ? label.toLowerCase() : 'metric-card';
-    return normalizedLabel.replace(/[^a-z0-9]+/g, '-');
-  }, [label]);
-  const gaugeGradientId = useMemo(() => `gaugeGradient-${sanitizedLabel}`, [sanitizedLabel]);
-  const sparkGradientId = useMemo(() => `sparkGradient-${sanitizedLabel}`, [sanitizedLabel]);
-
   const formattedValue = useMemo(() => {
     if (value === null || value === undefined) {
       return null;
@@ -143,12 +132,6 @@ function MetricCardComponent({
 
       <View style={styles.visualRow}>
         <Svg width={84} height={48} viewBox="0 0 84 48">
-          <Defs>
-            <LinearGradient id={gaugeGradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-              <Stop offset="0%" stopColor="rgba(255,255,255,0.25)" />
-              <Stop offset="100%" stopColor={statusStyles.color} />
-            </LinearGradient>
-          </Defs>
           <Circle
             cx="42"
             cy="42"
@@ -165,7 +148,7 @@ function MetricCardComponent({
             cx="42"
             cy="42"
             r={gaugePath.radius}
-            stroke={`url(#${gaugeGradientId})`}
+            stroke={statusStyles.color}
             strokeWidth={8}
             fill="transparent"
             strokeDasharray={gaugePath.dashArray}
@@ -178,12 +161,6 @@ function MetricCardComponent({
         <View style={styles.sparklineContainer}>
           {clampedHistory.length > 1 ? (
             <Svg width="100%" height="100%" viewBox="0 0 120 40" preserveAspectRatio="none">
-              <Defs>
-                <LinearGradient id={sparkGradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-                  <Stop offset="0%" stopColor="rgba(255,255,255,0.3)" />
-                  <Stop offset="100%" stopColor={statusStyles.color} />
-                </LinearGradient>
-              </Defs>
               <Path
                 d={`M0,40 L${sparklinePoints} L120,40 Z`}
                 fill="rgba(255,255,255,0.08)"
@@ -191,7 +168,7 @@ function MetricCardComponent({
               <Polyline
                 points={sparklinePoints}
                 fill="none"
-                stroke={`url(#${sparkGradientId})`}
+                stroke={statusStyles.color}
                 strokeWidth={2}
                 strokeLinejoin="round"
                 strokeLinecap="round"
