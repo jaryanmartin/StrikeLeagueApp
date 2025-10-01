@@ -1,19 +1,19 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import useBLE from '@/hooks/useBLE';
+// import useBLE from '@/hooks/useBLE';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet } from 'react-native';
 
 export default function CalibrationScreen() {
   const router = useRouter();
-  const { turnOffLaunchMonitor } = useBLE();
+  // const { turnOffLaunchMonitor } = useBLE();
   
   return (
      <ThemedView style={{ flex: 1, padding: 100 }}>
       <Pressable onPress={() => {
         console.log('Back pressed');
-        router.back();
+        router.push('/settings');
       }} style={styles.backIcon}>
         <Ionicons name="arrow-back" size={28} color="white" />
       </Pressable>
@@ -22,11 +22,15 @@ export default function CalibrationScreen() {
         <ThemedText style={styles.titleText}>Calibration</ThemedText>
       </ThemedView>
 
-      <Pressable onPress={() => router.push('/ble')} style={styles.boxInitial}>
+      <Pressable
+        onPress={() => router.push('/calibration/lighting_wait')}
+        style={styles.boxInitial}>
         <ThemedText style={styles.boxText}>Calibrate Lighting</ThemedText>
       </Pressable>
 
-      <Pressable onPress={() => router.push('/calibration')} style={styles.boxCalibration}>
+      <Pressable
+        onPress={() => router.push('/calibration/distance_wait')}
+        style={styles.boxCalibration}>
         <ThemedText style={styles.boxText}>Calibrate Distance</ThemedText>
       </Pressable>
 

@@ -1,6 +1,7 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import useBLE from '@/hooks/useBLE';
+import { useBleStore } from '@/stores/bleStores';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
@@ -16,11 +17,14 @@ export default function BluetoothScreen() {
     connectToDevice,
     connectedDevice,
     startRecord,
-    
+    calibrateLighting,
   } = useBLE();
+
+  const isLightingCalibrated = useBleStore((state) => state.isLightingCalibrated);
 
   useEffect(() => {
     requestPermissions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
  
   return (
@@ -59,9 +63,29 @@ export default function BluetoothScreen() {
         </View>
       )}
 
-      <View style={styles.startButton}>
+      {/* <View style={styles.startButton}>
         <Button title="Start Recording" onPress={startRecord} />
+      </View> */}
+
+      <View style={styles.calibrationControls}>
+        {/* <Button
+          title={isLightingCalibrated ? "Recalibrate Lighting" : "Calibrate Lighting"}
+          onPress={calibrateLighting}
+          disabled={!connectedDevice}
+        /> */}
+        <Button
+          title="Start Recording"
+          onPress={startRecord}
+          // disabled={!isLightingCalibrated}
+        />
       </View>
+
+      {!isLightingCalibrated && (
+        <Text style={styles.calibrationWarning}>
+          Calibrate lighting after positioning the ball to enable recording.
+        </Text>
+      )}
+
     </ThemedView>
   );
 }
@@ -119,12 +143,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginVertical: 20,
   },
-  startButton: {
+  // startButton: {
+  calibrationControls: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginVertical: 20,
     left: 35,
     bottom: 40,
+    width: 300,
+  },
+  calibrationWarning: {
+    color: '#f0ad4e',
+    marginTop: 8,
+    marginLeft: 35,
   },
   sectionTitle: {
     fontSize: 18,
@@ -151,6 +182,7 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#333',
     borderRadius: 8,
+    bottom: 50,
   },
   connectedText: {
     color: 'white',

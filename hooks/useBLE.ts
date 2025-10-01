@@ -11,6 +11,7 @@ import {
   BleManager,
   Characteristic,
   Device,
+  Subscription
 } from "react-native-ble-plx";
 
 const DATA_SERVICE_UUID = "96f0284d-8895-4c08-baaf-402a2f7e8c5b";
@@ -20,11 +21,7 @@ const LAUNCH_MONITOR_CHARACTERISTIC_UUID = "449145fa-bad8-4b71-8094-44089b2c29b9
 const LIGHTING_CHARACTERISTIC_UUID = "712da68d-cc4e-423e-b818-3f4cdf3a712a";
 const DISTANCE_CHARACTERISTIC_UUID = "a019ec27-5acf-4128-8a12-435901fc07ca";
 
-// const SWINGPATH_CHARACTERISTIC_UUID = "449145fa-bad8-4b71-8094-44089b2c29b9";
-// const SIDEANGLE_CHARACTERISTIC_UUID = "a019ec27-5acf-4128-8a12-435901fc07ca";
-// const ATTACKANGLE_CHARACTERISTIC_UUID = "712da68d-cc4e-423e-b818-3f4cdf3a712a";
-
-const VIRTUAL_DEVICE_NAME = "Company17_Rpi5"; 
+const VIRTUAL_DEVICE_NAME = "Company17_Rpi"; 
 
 const bleManager = new BleManager();
 
@@ -39,6 +36,7 @@ function useBLE() {
   setAttackAngle,
   setFeedback,
   setTime,
+  // setLightingCalibrated,
 } = useBleStore.getState();
 
   const requestAndroid31Permissions = async () => {
@@ -183,29 +181,6 @@ function useBLE() {
       {
         setFeedback(raw);
       }
-
-
-
-    // react-native-ble-plx converts raw data from peripheral into base64
-    // const raw = Buffer.from(characteristic.value, 'base64');
-    // const metricValue = raw.readInt16LE(0);
-
-    // if (characteristic.uuid == FACEANGLE_CHARACTERISTIC_UUID)
-    // {
-    //   setFaceAngle(metricValue);
-    // }
-    // else if (characteristic.uuid == SWINGPATH_CHARACTERISTIC_UUID)
-    // {
-    //   setSwingPath(metricValue);
-    // }
-    // else if ( characteristic.uuid == SIDEANGLE_CHARACTERISTIC_UUID)
-    // {
-    //   setSideAngle(metricValue);
-    // }
-    // else if (characteristic.uuid == ATTACKANGLE_CHARACTERISTIC_UUID)
-    // {
-    //   setAttackAngle(metricValue);
-    // }
   };
 
   const startStreamingData = async (device: Device) => {
@@ -217,36 +192,6 @@ function useBLE() {
         onDataUpdate
       );
 
-      // device.monitorCharacteristicForService(
-      //   DATA_SERVICE_UUID,
-      //   FEEDBACK_CHARACTERISTIC_UUID,
-      //   onDataUpdate
-      // );
-
-      // device.monitorCharacteristicForService(
-      //   DATA_SERVICE_UUID,
-      //   FACEANGLE_CHARACTERISTIC_UUID, 
-      //   onDataUpdate
-      // );
-
-      // device.monitorCharacteristicForService(
-      //   DATA_SERVICE_UUID,
-      //   SWINGPATH_CHARACTERISTIC_UUID, 
-      //   onDataUpdate
-      // );
-
-      // device.monitorCharacteristicForService(
-      //   DATA_SERVICE_UUID,
-      //   SIDEANGLE_CHARACTERISTIC_UUID, 
-      //   onDataUpdate
-      // );
-
-      // device.monitorCharacteristicForService(
-      //   DATA_SERVICE_UUID,
-      //   ATTACKANGLE_CHARACTERISTIC_UUID, 
-      //   onDataUpdate
-      // );
-
     } else {
       console.log("No Device Connected");
     }
@@ -257,11 +202,19 @@ function useBLE() {
 };
 
   const startRecord = async() => {
-   
     if (!connectedDevice) {
-    console.error("No device connected.");
-    return;
-  }
+      console.error("No device connected.");
+      return;
+    }
+
+    // const { isLightingCalibrated } = useBleStore.getState();
+    // if (!isLightingCalibrated) {
+    //   Alert.alert(
+    //     "Calibrate lighting",
+    //     "Please calibrate the lighting before starting a recording."
+    //   );
+    //   return;
+    // }
 
   const message = "A";
   const base64 = Buffer.from(message, 'utf-8').toString('base64');
@@ -282,9 +235,9 @@ function useBLE() {
   const calibrateLighting = async() => {
    
     if (!connectedDevice) {
-    console.error("No device connected.");
-    return;
-  }
+      console.error("No device connected.");
+      return;
+    }
 
   const message = "B";
   const base64 = Buffer.from(message, 'utf-8').toString('base64');
@@ -304,7 +257,7 @@ function useBLE() {
 
   const calibrateDistance = async() => {
    
-    if (!connectedDevice) {
+  if (!connectedDevice) {
     console.error("No device connected.");
     return;
   }
@@ -319,9 +272,11 @@ function useBLE() {
       DISTANCE_CHARACTERISTIC_UUID,
       base64
     );
-    console.log("START command sent.");
+    // setLightingCalibrated(true);
+    console.log("Lighting calibration command sent.");
     } catch (error) {
-      console.error("Failed to send START:", error);
+      console.error("Failed to send lighting calibration command:", error);
+      // setLightingCalibrated(false);
     }
   };
 
@@ -342,6 +297,100 @@ function useBLE() {
     } catch (error) {
       console.error("Failed to read feedback:", error);
     }
+  };
+
+  const monitorLightingCalibration = (
+    onValue: (value: string) => void,
+    onError?: (error: BleError | Error) => void,
+  ) => {
+    if (!connectedDevice) {
+      console.error("No device connected.");
+      return () => {};
+    }
+
+    let subscription: Subscription | null = null;
+
+    try {
+      subscription = bleManager.monitorCharacteristicForDevice(
+        connectedDevice.id,
+        DATA_SERVICE_UUID,
+        LIGHTING_CHARACTERISTIC_UUID,
+        (error, characteristic) => {
+          if (error) {
+            console.error("Lighting calibration monitor error:", error);
+            onError?.(error);
+            return;
+          }
+
+          if (!characteristic?.value) {
+            return;
+          }
+
+          const value = Buffer.from(characteristic.value, 'base64').toString('utf-8');
+          onValue(value);
+        }
+      );
+    } catch (error) {
+      console.error("Failed to start lighting calibration monitor:", error);
+      if (onError && error instanceof Error) {
+        onError(error);
+      }
+    }
+
+    return () => {
+      try {
+        subscription?.remove();
+      } catch (error) {
+        console.warn("Failed to stop lighting calibration monitor:", error);
+      }
+    };
+  };
+
+  const monitorDistanceCalibration = (
+    onValue: (value: string) => void,
+    onError?: (error: BleError | Error) => void,
+  ) => {
+    if (!connectedDevice) {
+      console.error("No device connected.");
+      return () => {};
+    }
+
+    let subscription: Subscription | null = null;
+
+    try {
+      subscription = bleManager.monitorCharacteristicForDevice(
+        connectedDevice.id,
+        DATA_SERVICE_UUID,
+        DISTANCE_CHARACTERISTIC_UUID,
+        (error, characteristic) => {
+          if (error) {
+            console.error("Distance calibration monitor error:", error);
+            onError?.(error);
+            return;
+          }
+
+          if (!characteristic?.value) {
+            return;
+          }
+
+          const value = Buffer.from(characteristic.value, 'base64').toString('utf-8');
+          onValue(value);
+        }
+      );
+    } catch (error) {
+      console.error("Failed to start distance calibration monitor:", error);
+      if (onError && error instanceof Error) {
+        onError(error);
+      }
+    }
+
+    return () => {
+      try {
+        subscription?.remove();
+      } catch (error) {
+        console.warn("Failed to stop distance calibration monitor:", error);
+      }
+    };
   };
 
   const turnOffLaunchMonitor = async () => {
@@ -379,6 +428,8 @@ function useBLE() {
     turnOffLaunchMonitor,
     calibrateLighting,
     calibrateDistance,
+    monitorLightingCalibration,
+    monitorDistanceCalibration,
   };
 }
 
