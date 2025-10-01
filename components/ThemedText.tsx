@@ -1,4 +1,4 @@
-import { StyleSheet, Text, type TextProps } from 'react-native';
+import { Platform, StyleSheet, Text, type TextProps } from 'react-native';
 
 import { useThemeColor } from '@/hooks/useThemeColor';
 
@@ -15,7 +15,8 @@ export function ThemedText({
   type = 'default',
   ...rest
 }: ThemedTextProps) {
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const colorRole: 'text' | 'tint' = type === 'link' ? 'tint' : 'text';
+  const color = useThemeColor({ light: lightColor, dark: darkColor }, colorRole);
 
   return (
     <Text
@@ -35,26 +36,36 @@ export function ThemedText({
 
 const styles = StyleSheet.create({
   default: {
+    fontFamily: Platform.select({ ios: 'System', android: 'Roboto', default: 'sans-serif' }),
     fontSize: 16,
     lineHeight: 24,
+    letterSpacing: 0.15,
   },
   defaultSemiBold: {
+    fontFamily: Platform.select({ ios: 'System', android: 'Roboto', default: 'sans-serif' }),
     fontSize: 16,
     lineHeight: 24,
+    letterSpacing: 0.15,
     fontWeight: '600',
   },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    lineHeight: 32,
+    fontFamily: 'StrikeLeagueTitle',
+    fontSize: 34,
+    lineHeight: 40,
+    letterSpacing: 4,
   },
   subtitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: Platform.select({ ios: 'System', android: 'Roboto', default: 'sans-serif' }),
+    fontSize: 18,
+    lineHeight: 26,
+    letterSpacing: 0.1,
+    fontWeight: '600',
   },
   link: {
-    lineHeight: 30,
+    fontFamily: Platform.select({ ios: 'System', android: 'Roboto', default: 'sans-serif' }),
+    lineHeight: 24,
     fontSize: 16,
-    color: '#0a7ea4',
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
 });
