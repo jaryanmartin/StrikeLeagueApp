@@ -1,6 +1,6 @@
 import type { ImageProps } from 'expo-image';
 import { Image } from 'expo-image';
-import { StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
+import { StyleSheet, type ImageStyle, type StyleProp } from 'react-native';
 
 type GradientPoint = { x: number; y: number };
 
@@ -8,7 +8,7 @@ type GradientOverlayProps = {
   colors: string[];
   start?: GradientPoint;
   end?: GradientPoint;
-  style?: StyleProp<ViewStyle>;
+  style?: StyleProp<ImageStyle>;
   pointerEvents?: ImageProps['pointerEvents'];
 };
 
