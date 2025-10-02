@@ -7,7 +7,7 @@ import type { BleState } from '@/stores/bleStores';
 import { useBleStore } from '@/stores/bleStores';
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 const safeLocaleString = (value: Date | string | number | null | undefined) => {
   if (!value) {
@@ -35,6 +35,21 @@ const HISTORY_LENGTH = 20;
 type MetricKey = 'faceAngle' | 'swingPath' | 'sideAngle' | 'attackAngle';
 
 type MetricHistory = Partial<Record<MetricKey, number[]>>;
+
+type MetricConfig = {
+  key: MetricKey;
+  label: string;
+  value: number | null | undefined;
+  unit: string;
+  range: { min: number; max: number };
+  history: number[];
+};
+
+type EnhancedMetric = MetricConfig & {
+  delta: number | null;
+  status: 'positive' | 'negative' | 'neutral';
+  isLoading: boolean;
+};
 
 export default function MetricScreen() {
   const faceAngle = useBleStore((state: BleState) => state.faceAngle);
@@ -77,7 +92,7 @@ export default function MetricScreen() {
 
   const formattedTimestamp = useMemo(() => safeLocaleString(time), [time]);
 
-  const metrics = useMemo(
+  const metrics = useMemo<MetricConfig[]>(
     () => [
       {
         key: 'faceAngle' as const,
@@ -96,12 +111,12 @@ export default function MetricScreen() {
         history: metricHistory.swingPath ?? [],
       },
       {
-        key: 'sideAngle' as const,
-        label: 'Side Angle',
-        value: sideAngle,
+        key: 'swingPath' as const,
+        label: 'Swing Path',
+        value: swingPath,
         unit: '°',
-        range: { min: -25, max: 25 },
-        history: metricHistory.sideAngle ?? [],
+        range: { min: -40, max: 40 },
+        history: metricHistory.swingPath ?? [],
       },
       {
         key: 'attackAngle' as const,
@@ -112,10 +127,19 @@ export default function MetricScreen() {
         history: metricHistory.attackAngle ?? [],
       },
     ],
-    [attackAngle, faceAngle, metricHistory.attackAngle, metricHistory.faceAngle, metricHistory.sideAngle, metricHistory.swingPath, sideAngle, swingPath],
+    [
+      attackAngle,
+      faceAngle,
+      metricHistory.attackAngle,
+      metricHistory.faceAngle,
+      metricHistory.sideAngle,
+      metricHistory.swingPath,
+      sideAngle,
+      swingPath,
+    ],
   );
 
-  const enhancedMetrics = useMemo(
+  const enhancedMetrics = useMemo<EnhancedMetric[]>(
     () =>
       metrics.map((metric) => {
         const historyPoints = metric.history ?? [];
@@ -144,6 +168,7 @@ export default function MetricScreen() {
   );
 
   const isFeedbackLoading = !feedback;
+  const totalMetricRows = Math.ceil(enhancedMetrics.length / 2);
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -174,22 +199,35 @@ export default function MetricScreen() {
           </Pressable>
         </ThemedView>
 
-        <View style={styles.metricsGrid}>
-          {enhancedMetrics.map((metric) => (
-            <View key={metric.key} style={styles.metricWrapper}>
-              <MetricCard
-                label={metric.label}
-                value={metric.value}
-                unit={metric.unit}
-                delta={metric.delta}
-                status={metric.status}
-                history={metric.history}
-                range={metric.range}
-                isLoading={metric.isLoading}
-              />
-            </View>
-          ))}
-        </View>
+        <FlatList<EnhancedMetric>
+          data={enhancedMetrics}
+          keyExtractor={(metric) => metric.key}
+          numColumns={2}
+          scrollEnabled={false}
+          columnWrapperStyle={styles.metricsRow}
+          contentContainerStyle={styles.metricsList}
+          renderItem={({ item, index }) => {
+            const rowIndex = Math.floor(index / 2);
+            const isLastRow = rowIndex === totalMetricRows - 1;
+
+            return (
+              <View
+                style={[styles.metricWrapper, isLastRow && styles.metricWrapperLastRow]}
+              >
+                <MetricCard
+                  label={item.label}
+                  value={item.value}
+                  unit={item.unit}
+                  delta={item.delta}
+                  status={item.status}
+                  history={item.history}
+                  range={item.range}
+                  isLoading={item.isLoading}
+                />
+              </View>
+            );
+          }}
+        />
       </ThemedView>
     </ScrollView>
   );
@@ -256,13 +294,21 @@ const styles = StyleSheet.create({
   refreshLabel: {
     fontSize: 16,
   },
-  metricsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 16,
+  metricsList: {
+    paddingTop: 8,
+    paddingBottom: 8,
+  },
+  metricsRow: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'stretch',
   },
   metricWrapper: {
-    width: '48%',
+    flex: 1,
+    marginHorizontal: 8,
+    marginBottom: 16,
+  },
+  metricWrapperLastRow: {
+    marginBottom: 0,
   },
 });
