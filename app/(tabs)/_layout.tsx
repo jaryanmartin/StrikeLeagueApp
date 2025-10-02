@@ -56,21 +56,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="feedback"
-        options={{
-          title: 'Feedback',
-          tabBarStyle: { display: 'none' },
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="history"
-        options={{
-          title: 'History',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="clock.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="settings"
         options={{
           title: 'Settings',
@@ -87,7 +72,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="calibration"
+        name="Calibration"
         options={{
           title: 'Calibration',
           tabBarStyle: { display: 'none' }, 
