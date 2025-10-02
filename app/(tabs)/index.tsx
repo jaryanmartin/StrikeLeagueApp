@@ -7,8 +7,11 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import useBLE from '@/hooks/useBLE';
+
 export default function HomeScreen() {
   const router = useRouter();
+  const { startRecord } = useBLE();
 
   const colorScheme = useColorScheme() ?? 'light';
   const palette = Colors[colorScheme];
@@ -36,7 +39,10 @@ export default function HomeScreen() {
 
       <View style={styles.actionSection}>
         <Pressable
-          onPress={() => router.push('/metrics')}
+          onPress={async () => {
+            await startRecord();
+            router.push('/metrics');
+          }}
           style={[
             styles.primaryAction,
             {
@@ -44,13 +50,13 @@ export default function HomeScreen() {
               shadowColor: colorScheme === 'dark' ? '#000000' : palette.accent,
             },
           ]}
-          accessibilityLabel="Open swing analytics">
+          accessibilityLabel="Start swing recording session">
           <ThemedText
             type="defaultSemiBold"
             style={styles.actionLabel}
             lightColor={Colors.light.background}
             darkColor={Colors.dark.background}>
-            Swing Analytics
+            Start Recording
           </ThemedText>
         </Pressable>
 
