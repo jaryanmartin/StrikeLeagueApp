@@ -35,7 +35,7 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
-          name="calibration"
+          name="Calibration"
           options={{
             presentation: 'modal',
             headerShown: false,
