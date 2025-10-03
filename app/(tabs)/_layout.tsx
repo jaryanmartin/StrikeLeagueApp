@@ -51,7 +51,6 @@ export default function TabLayout() {
         name="metrics"
         options={{
           title: 'Metrics',
-          tabBarStyle: { display: 'none' },
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
       />
@@ -59,7 +58,6 @@ export default function TabLayout() {
         name="settings"
         options={{
           title: 'Settings',
-          tabBarStyle: { display: 'none' }, 
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
       />
@@ -67,7 +65,6 @@ export default function TabLayout() {
         name="ble"
         options={{
           title: 'Ble',
-          tabBarStyle: { display: 'none' }, 
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
       />
@@ -75,7 +72,6 @@ export default function TabLayout() {
         name="Calibration"
         options={{
           title: 'Calibration',
-          tabBarStyle: { display: 'none' }, 
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
       />
