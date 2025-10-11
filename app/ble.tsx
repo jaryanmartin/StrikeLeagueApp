@@ -1,11 +1,14 @@
+import { GradientOverlay } from '@/components/GradientOverlay';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { Colors } from '@/constants/Colors';
 import useBLE from '@/hooks/useBLE';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { useBleStore } from '@/stores/bleStores';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
-import { Button, FlatList, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function BluetoothScreen() {
   const router = useRouter();
@@ -19,6 +22,8 @@ export default function BluetoothScreen() {
     calibrateLighting,
   } = useBLE();
 
+  const colorScheme = useColorScheme() ?? 'light';
+  const palette = Colors[colorScheme];
   const isLightingCalibrated = useBleStore((state) => state.isLightingCalibrated);
 
   useEffect(() => {
@@ -27,163 +32,248 @@ export default function BluetoothScreen() {
   }, []);
  
   return (
-     <ThemedView style={{ flex: 1, padding: 100 }}>
-      <Pressable onPress={() => {
-        console.log('Back pressed');
-        router.push('/settings');
-      }} style={styles.options}>
-        <Ionicons name="arrow-back" size={28} color="white" />
+    <ThemedView style={[styles.container, { backgroundColor: 'transparent' }]}>
+      <GradientOverlay colors={palette.heroGradient} />
+      <Pressable
+        onPress={() => router.push('/(tabs)/settings')}
+        style={[
+          styles.backButton,
+          {
+            borderColor: palette.surfaceMuted,
+            backgroundColor: colorScheme === 'dark' ? palette.surface : `${palette.surface}F2`,
+          },
+        ]}
+        accessibilityLabel="Go back">
+        <Ionicons
+          name="arrow-back"
+          size={20}
+          color={colorScheme === 'dark' ? palette.text : palette.tint}
+        />
       </Pressable>
 
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText style={styles.titleText}>Bluetooth</ThemedText>
-      </ThemedView>
-
-      <View style={styles.scanControls}>
-        <Button title="Start Scan" onPress={startScan} />
-        <Button title="Stop Scan" onPress={stopScan} />
-      </View>
-
-      <Text style={styles.sectionTitle}>Discovered Devices:</Text>
-      <FlatList
-        data={allDevices}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => connectToDevice(item)} style={styles.deviceItem}>
-            <Text style={styles.deviceName}>{item.name ?? 'Unnamed Device'}</Text>
-            <Text style={styles.deviceId}>{item.id}</Text>
-          </TouchableOpacity>
-        )}
-      />
-
-      {connectedDevice && (
-        <View style={styles.connectionInfo}>
-          <Text style={styles.connectedText}>Connected to: {connectedDevice.name}</Text>
+      <View style={styles.heroSection}>
+        <GradientOverlay
+          colors={[`${palette.accent}1A`, 'transparent']}
+          style={styles.heroGlow}
+          start={{ x: 0.3, y: 0 }}
+          end={{ x: 0.7, y: 1 }}
+          pointerEvents="none"
+        />
+        <View style={[styles.heroIcon, { backgroundColor: `${palette.accent}1A` }]}>
+          <Ionicons name="bluetooth" size={36} color={palette.accent} />
         </View>
-      )}
-
-      {/* <View style={styles.startButton}>
-        <Button title="Start Recording" onPress={startRecord} />
-      </View> */}
-
-      <View style={styles.calibrationControls}>
-        {/* <Button
-          title={isLightingCalibrated ? "Recalibrate Lighting" : "Calibrate Lighting"}
-          onPress={calibrateLighting}
-          disabled={!connectedDevice}
-        /> */}
-        {/* <Button
-          title="Start Recording"
-          onPress={startRecord}
-          // disabled={!isLightingCalibrated}
-        /> */}
+        <ThemedText type="title" style={styles.titleText}>
+          Bluetooth Devices
+        </ThemedText>
+        <ThemedText type="subtitle" style={styles.subtitle}>
+          Connect your tracker to begin capturing swing metrics in real time.
+        </ThemedText>
       </View>
 
-      {!isLightingCalibrated && (
-        <Text style={styles.calibrationWarning}>
-          Calibrate lighting after positioning the ball to enable recording.
-        </Text>
-      )}
+      <View style={styles.actionSection}>
+        <Pressable
+          onPress={startScan}
+          style={[
+            styles.primaryAction,
+            {
+              backgroundColor: palette.accent,
+              shadowColor: colorScheme === 'dark' ? '#000000' : palette.accent,
+            },
+          ]}
+          accessibilityLabel="Start scanning for Bluetooth devices">
+          <ThemedText
+            type="defaultSemiBold"
+            style={styles.actionLabel}
+            lightColor={Colors.light.background}
+            darkColor={Colors.dark.background}>
+            Start Scan
+          </ThemedText>
+        </Pressable>
 
+           {/* <View style={styles.startButton}>
+                <Button title="Start Recording" onPress={startRecord} />
+              </View> */}
+
+        <Pressable
+          onPress={stopScan}
+          style={[
+            styles.secondaryAction,
+            {
+              backgroundColor: palette.surface,
+              borderColor: palette.surfaceMuted,
+            },
+          ]}
+          accessibilityLabel="Stop scanning for Bluetooth devices">
+          <ThemedText type="defaultSemiBold" style={styles.actionLabel}>
+            Stop Scan
+          </ThemedText>
+        </Pressable>
+      </View>
+
+      <View style={styles.devicesSection}>
+        <ThemedText type="subtitle" style={styles.sectionTitle}>
+          Available Devices
+        </ThemedText>
+        <FlatList
+          data={allDevices}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.devicesList}
+          ListEmptyComponent={
+            <ThemedText style={styles.emptyState}>
+              No devices found yet. Start a scan to discover nearby trackers.
+            </ThemedText>
+          }
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => connectToDevice(item)}
+              style={[
+                styles.deviceItem,
+                {
+                  borderColor: palette.surfaceMuted,
+                  backgroundColor:
+                    connectedDevice?.id === item.id ? `${palette.accent}26` : palette.surface,
+                },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel={`Connect to ${item.name ?? 'Unnamed Device'}`}>
+              <View style={styles.deviceHeader}>
+                <ThemedText type="defaultSemiBold" style={styles.deviceName}>
+                  {item.name ?? 'Unnamed Device'}
+                </ThemedText>
+                {connectedDevice?.id === item.id && (
+                  <View style={[styles.connectedBadge, { backgroundColor: `${palette.accent}40` }]}> 
+                    <Ionicons name="checkmark-circle" size={16} color={palette.accent} />
+                    <ThemedText style={styles.connectedLabel}>Connected</ThemedText>
+                  </View>
+                )}
+              </View>
+              <ThemedText style={styles.deviceId}>{item.id}</ThemedText>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 500,
-    right: 100,
-    top: 25,
-  },
-  titleText: {
-    fontSize: 45,
-    lineHeight: 56,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    fontFamily: 'StrikeLeagueBold',
-    color: 'white',
-    flexWrap: 'nowrap',
-    right: 40,
-    bottom: 15,
-},
-  faceAngle: {
-    textAlign: 'center',
-    color: 'white',
-    right: 75,
-    bottom: 15,
-    marginTop: 120,
-},
-  options: {
-    color: 'white',
-    right: 75,
-    bottom: 15,
-    marginTop: 90,
-},
-  boxText: {
-    fontSize: 20,
-    fontWeight: '500',
-    color: 'black',
-  },
   container: {
     flex: 1,
-    paddingTop: 80,
+    paddingTop: 72,
     paddingHorizontal: 24,
+    paddingBottom: 40,
   },
-  scanControls: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: 20,
+  backButton: {
+    alignSelf: 'flex-start',
+    padding: 10,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginBottom: 8,
   },
-  calibrationControls: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: 20,
-    left: 35,
-    bottom: 40,
-    width: 300,
-  },
-  calibrationWarning: {
-    color: '#f0ad4e',
+  heroSection: {
+    alignItems: 'center',
+    paddingBottom: 24,
     marginTop: 8,
-    marginLeft: 35,
+  },
+  heroGlow: {
+    position: 'absolute',
+    top: -140,
+    left: -140,
+    right: -140,
+    height: 320,
+    borderRadius: 240,
+  },
+  heroIcon: {
+    height: 72,
+    width: 72,
+    borderRadius: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  titleText: {
+    textTransform: 'uppercase',
+    letterSpacing: 6,
+    textAlign: 'center',
+},
+  subtitle: {
+    maxWidth: 340,
+    textAlign: 'center',
+    opacity: 0.85,
+    marginTop: 12,
+},
+  actionSection: {
+    gap: 16,
+  },
+  primaryAction: {
+    borderRadius: 22,
+    paddingVertical: 18,
+    alignItems: 'center',
+    shadowOpacity: 0.35,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 6,
+  },
+  secondaryAction: {
+    borderRadius: 20,
+    paddingVertical: 18,
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  actionLabel: {
+    fontSize: 16,
+    letterSpacing: 0.3,
+  },
+  devicesSection: {
+    marginTop: 32,
+    flex: 1,
   },
   sectionTitle: {
-    fontSize: 18,
-    color: 'white',
-    marginBottom: 10,
-    fontWeight: '600',
+    marginBottom: 12,
+    textAlign: 'left',
+  },
+  devicesList: {
+    gap: 12,
+    paddingBottom: 16,
   },
   deviceItem: {
-    backgroundColor: '#222',
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 10,
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+  },
+  deviceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  connectedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  connectedLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    opacity: 0.85,
   },
   deviceName: {
-    color: 'white',
     fontSize: 16,
   },
   deviceId: {
-    color: '#aaa',
+    opacity: 0.7,
     fontSize: 12,
   },
-  connectionInfo: {
-    marginTop: 30,
-    padding: 10,
-    backgroundColor: '#333',
-    borderRadius: 8,
-    bottom: 50,
+  emptyState: {
+    textAlign: 'center',
+    opacity: 0.7,
+    paddingVertical: 32,
   },
-  connectedText: {
-    color: 'white',
-    fontSize: 16,
-  },
-  metricText: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginTop: 8,
-    color: '#aaa',
+  calibrationWarning: {
+    textAlign: 'center',
+    marginTop: 16,
   },
 });
