@@ -26,13 +26,7 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
           name="ble"
-          options={{
-            title: 'Bluetooth Pairing',
-            presentation: 'modal',
-            headerTintColor: palette.text,
-            headerStyle: { backgroundColor: palette.surface },
-            headerBackTitle: 'Settings',
-          }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="calibration"

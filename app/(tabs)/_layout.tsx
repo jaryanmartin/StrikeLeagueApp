@@ -78,12 +78,6 @@ export default function TabLayout() {
         }}
       />
 
-      <Tabs.Screen name="calibration" options={{ href: null }} />
-      <Tabs.Screen name="calibration/index" options={{ href: null }} />
-      <Tabs.Screen name="calibration/wait" options={{ href: null }} />
-      <Tabs.Screen name="calibration/success" options={{ href: null }} />
-
-
     </Tabs>
   );
 }
