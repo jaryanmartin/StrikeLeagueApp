@@ -18,29 +18,11 @@ export default function SettingsScreen() {
         <ThemedText style={styles.boxText}>Connect Bluetooth</ThemedText>
       </Pressable>
 
-      <Pressable onPress={() => router.push('/calibration')} style={styles.boxCalibration}>
-        <ThemedText style={styles.boxText}>Calibration</ThemedText>
+      <Pressable
+        onPress={() => router.push('./calibration/wait')}
+        style={styles.boxCalibration}>
+        <ThemedText style={styles.boxText}>Calibrate Lighting</ThemedText>
       </Pressable>
-
-      {/* <ThemedView style={styles.options}>
-        <ThemedText type='subtitle'>Units of Measurement:</ThemedText>
-      </ThemedView>
-
-      <ThemedView style={styles.options}>
-        <ThemedText type='subtitle'>Toggle Sound:</ThemedText>
-      </ThemedView>
-
-      <ThemedView style={styles.options}>
-        <ThemedText type='subtitle'>Light/Dark Mode:</ThemedText>
-      </ThemedView> */}
-
-      {/* <Pressable onPress={turnOffLaunchMonitor} style={styles.options}>
-        <ThemedText type='subtitle'>Power Off:</ThemedText>
-      </Pressable> */}
-
-      {/* <ThemedView style={styles.options}>
-        <ThemedText type='subtitle'>Log Out:</ThemedText>
-      </ThemedView> */}
 
     </ThemedView>
   );
@@ -100,18 +82,5 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '500',
     color: 'black',
-  },
-  boxHistory: {
-    marginTop: 30,
-    borderRadius: 20,
-    borderWidth: 3,
-    borderColor: 'black',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    marginVertical: 10,
-    alignItems: 'center',
-    width: 350,
-    alignSelf: 'center',
-    backgroundColor: '#FFD9D9',
   },
 });

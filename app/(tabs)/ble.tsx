@@ -16,7 +16,6 @@ export default function BluetoothScreen() {
     allDevices,
     connectToDevice,
     connectedDevice,
-    startRecord,
     calibrateLighting,
   } = useBLE();
 
@@ -32,7 +31,7 @@ export default function BluetoothScreen() {
       <Pressable onPress={() => {
         console.log('Back pressed');
         router.push('/settings');
-      }} style={styles.backIcon}>
+      }} style={styles.options}>
         <Ionicons name="arrow-back" size={28} color="white" />
       </Pressable>
 
@@ -73,11 +72,11 @@ export default function BluetoothScreen() {
           onPress={calibrateLighting}
           disabled={!connectedDevice}
         /> */}
-        <Button
+        {/* <Button
           title="Start Recording"
           onPress={startRecord}
           // disabled={!isLightingCalibrated}
-        />
+        /> */}
       </View>
 
       {!isLightingCalibrated && (
@@ -137,7 +136,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginVertical: 20,
   },
-  // startButton: {
   calibrationControls: {
     flexDirection: 'row',
     justifyContent: 'space-between',

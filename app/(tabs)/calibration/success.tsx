@@ -13,7 +13,7 @@ export default function LightingCalibrationSuccessScreen() {
       <ThemedText style={styles.message}>
         Your lighting calibration finished successfully. You can return to the home screen to continue.
       </ThemedText>
-      <Pressable style={styles.actionButton} onPress={() => router.replace('/calibration')}>
+      <Pressable style={styles.actionButton} onPress={() => router.replace('/settings')}>
         <ThemedText style={styles.actionButtonText}>Okay</ThemedText>
       </Pressable>
     </ThemedView>
@@ -23,13 +23,14 @@ export default function LightingCalibrationSuccessScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 100,
+    padding: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 32,
+    gap: 50,
+    paddingVertical: 100,
   },
   title: {
-    fontSize: 36,
+    fontSize: 32,
     color: 'white',
     fontFamily: 'StrikeLeagueBold',
     textAlign: 'center',

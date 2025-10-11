@@ -51,7 +51,7 @@ export default function LightingCalibrationWaitScreen() {
     const unsubscribe = monitorLightingCalibration(
       (value) => {
         if (isSuccessValue(value)) {
-          router.replace('/calibration/lighting/success');
+          router.replace('/calibration/success');
         }
       },
       () => {
@@ -83,7 +83,7 @@ export default function LightingCalibrationWaitScreen() {
       </ThemedText>
       <Pressable
         style={[styles.actionButton, styles.cancelButton]}
-        onPress={() => router.replace('/calibration/lighting')}>
+        onPress={() => router.replace('/settings')}>
         <ThemedText style={styles.actionButtonText}>Cancel</ThemedText>
       </Pressable>
     </ThemedView>
