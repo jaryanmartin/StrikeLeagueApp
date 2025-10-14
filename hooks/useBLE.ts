@@ -36,7 +36,6 @@ function useBLE() {
   setAttackAngle,
   setFeedback,
   setTime,
-  // setLightingCalibrated,
 } = useBleStore.getState();
 
   const requestAndroid31Permissions = async () => {
@@ -427,9 +426,7 @@ function useBLE() {
     readFeedback,
     turnOffLaunchMonitor,
     calibrateLighting,
-    // calibrateDistance,
     monitorLightingCalibration,
-    // monitorDistanceCalibration,
   };
 }
 

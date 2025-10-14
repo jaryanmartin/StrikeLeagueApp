@@ -28,14 +28,13 @@ export default function BluetoothScreen() {
 
   useEffect(() => {
     requestPermissions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
  
   return (
     <ThemedView style={[styles.container, { backgroundColor: 'transparent' }]}>
       <GradientOverlay colors={palette.heroGradient} />
       <Pressable
-        onPress={() => router.push('/(tabs)/settings')}
+        onPress={() => router.back()}
         style={[
           styles.backButton,
           {
