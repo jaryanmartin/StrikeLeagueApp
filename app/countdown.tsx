@@ -1,25 +1,33 @@
+import { GradientOverlay } from '@/components/GradientOverlay';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { Colors } from '@/constants/Colors';
+import useBLE from '@/hooks/useBLE';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TimerCountdown() {
   const router = useRouter();
+  const { startRecord } = useBLE();
   const [time, setTime] = useState(5);
-  const [phase, setPhase] = useState<'PREP' | 'SWING' | 'DONE'>('PREP');
+  const [phase, setPhase] = useState<'WAITING' | 'PREP' | 'SWING' | 'DONE'>('WAITING');
   const duration = phase === 'PREP' ? 5000 : 10000;
+  const insets = useSafeAreaInsets();
+  const bottomGap = insets.bottom + 48;  
+
+  const colorScheme = useColorScheme() ?? 'light';
+  const palette = Colors[colorScheme];
 
   useEffect(() => {
-    if (phase === 'DONE') {
-      router.push('/(tabs)/metrics');
-      return undefined;
-    }
+    if (phase === 'WAITING' || phase === 'DONE') return;
 
     const start = performance.now();
     const timerId = setInterval(() => {
       const elapsed = performance.now() - start;
-      const remaining = duration - elapsed;
+      const remaining = Math.max(0, duration - elapsed); 
       setTime(remaining / 1000);
 
     if (remaining <= 0) {
@@ -31,18 +39,89 @@ export default function TimerCountdown() {
     return () => clearInterval(timerId);
   }, [phase]);
 
+  useEffect(() => {
+    if (phase !== 'SWING') return;
+    (async () => {
+      try {
+        await startRecord();
+      } catch (e) {
+        console.warn('Failed to send START:', e);
+        setPhase('DONE');
+      }
+    })();
+  }, [phase, startRecord]);
+
+  useEffect(() => {
+    if (phase === 'DONE') {
+      router.push('/(tabs)/metrics');
+    }
+  }, [phase]);
+
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText style={styles.title}>Put your phone down! 5 seconds!</ThemedText>
-      <ActivityIndicator style={styles.spinner} color="white" size="large" />
+    <ThemedView style={[styles.container, { backgroundColor: 'transparent'}]}>
+      <GradientOverlay colors={palette.heroGradient} />
+
+      <View style={styles.heroSection}>
+        <GradientOverlay
+          colors={[`${palette.accent}1A`, 'transparent']}
+          style={styles.heroGlow}
+          start={{ x: 0.2, y: 0 }}
+          end={{ x: 0.8, y: 1 }}
+          pointerEvents="none"
+        />
+
+        <ThemedText type="title" style={styles.titleText}>
+          Prepare to Swing
+        </ThemedText>
+        <ThemedText style={styles.subtitle} type="subtitle">
+          You have 5 seconds to set up after readying up, then recording starts automatically.
+        </ThemedText>
+      </View>
+
       <ThemedText style={styles.status}>
         {time.toFixed(2)}
       </ThemedText>
-      <Pressable
-        style={[styles.actionButton, styles.cancelButton]}
-        onPress={() => router.back()}>
-        <ThemedText style={styles.actionButtonText}>Cancel</ThemedText>
-      </Pressable>
+
+      <View style={[styles.actionSection, { marginBottom: bottomGap }]}>
+        <Pressable
+          onPress={async () => {
+            setPhase('PREP');
+          }}
+          style={({ pressed }) => [
+            styles.primaryAction,
+            {
+              backgroundColor: palette.accent,
+              shadowColor: colorScheme === 'dark' ? '#000000' : palette.accent,
+              opacity: pressed ? 0.8 :1,
+            },
+          ]}>
+          <ThemedText
+            type="defaultSemiBold"
+            style={styles.actionLabel}
+            lightColor={Colors.light.background}
+            darkColor={Colors.dark.background}>
+            Ready
+          </ThemedText>
+        </Pressable>
+
+        <Pressable
+          onPress={async () => {
+            router.back();
+          }}
+          style={({ pressed }) => [
+            styles.secondaryAction,
+            {
+              backgroundColor: palette.surface,
+              borderColor: palette.surfaceMuted,
+              opacity: pressed ? 0.8 : 1,
+            },
+          ]}
+        >
+          <ThemedText type="defaultSemiBold" style={styles.actionLabel}>
+            Cancel
+          </ThemedText>
+        </Pressable>
+      </View>
     </ThemedView>
   );
 }
@@ -50,20 +129,34 @@ export default function TimerCountdown() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    justifyContent: 'center',
+    paddingTop: 72,
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+    justifyContent: 'space-between',
+  },
+  heroSection: {
     alignItems: 'center',
-    gap: 64,
-  },
-  title: {
-    fontSize: 36,
-    color: 'white',
-    fontFamily: 'StrikeLeagueBold',
-    textAlign: 'center',
-    lineHeight: 45
-  },
-  spinner: {
     marginTop: 16,
+    paddingBottom: 24,
+  },
+  heroGlow: {
+    position: 'absolute',
+    top: -120,
+    left: -120,
+    right: -120,
+    height: 320,
+    borderRadius: 240,
+  },
+  titleText: {
+    textTransform: 'uppercase',
+    letterSpacing: 6,
+    textAlign: 'center',
+},
+  subtitle: {
+    maxWidth: 320,
+    textAlign: 'center',
+    opacity: 0.85,
+    marginTop: 12,
   },
   status: {
     fontSize: 25,
@@ -71,21 +164,26 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     maxWidth: 420,
   },
-  actionButton: {
-    marginTop: 24,
+  actionSection: {
+    gap: 16,
+  },
+  primaryAction: {
+    borderRadius: 22,
+    paddingVertical: 20,
+    alignItems: 'center',
+    shadowOpacity: 0.35,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 6,
+  },
+  secondaryAction: {
     borderRadius: 20,
-    borderWidth: 3,
-    borderColor: 'black',
-    paddingVertical: 12,
-    paddingHorizontal: 48,
-    backgroundColor: '#FFD9D9',
+    paddingVertical: 18,
+    alignItems: 'center',
+    borderWidth: 1,
   },
-  actionButtonText: {
+  actionLabel: {
     fontSize: 18,
-    fontWeight: '600',
-    color: 'black',
-  },
-  cancelButton: {
-    backgroundColor: '#FFD9D9',
+    letterSpacing: 0.3,
   },
 });

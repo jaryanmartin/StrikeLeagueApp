@@ -215,7 +215,7 @@ function useBLE() {
     //   return;
     // }
 
-  const message = "A";
+  const message = "START";
   const base64 = Buffer.from(message, 'utf-8').toString('base64');
 
   try {

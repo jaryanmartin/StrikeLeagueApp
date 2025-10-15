@@ -193,13 +193,13 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 6,
     textAlign: 'center',
-},
+  },
   subtitle: {
     maxWidth: 340,
     textAlign: 'center',
     opacity: 0.85,
     marginTop: 12,
-},
+  },
   actionSection: {
     gap: 16,
   },

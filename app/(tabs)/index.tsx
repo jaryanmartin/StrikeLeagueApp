@@ -98,11 +98,11 @@ const styles = StyleSheet.create({
     height: 320,
     borderRadius: 240,
   },
-  logo: {
-    height: 160,
-    width: 160,
-    marginBottom: 16,
-  },
+  // logo: {
+  //   height: 160,
+  //   width: 160,
+  //   marginBottom: 16,
+  // },
   titleText: {
     textTransform: 'uppercase',
     letterSpacing: 6,
@@ -113,6 +113,7 @@ const styles = StyleSheet.create({
     maxWidth: 320,
     textAlign: 'center',
     opacity: 0.85,
+    marginTop: 12,
   },
   actionSection: {
     gap: 16,
