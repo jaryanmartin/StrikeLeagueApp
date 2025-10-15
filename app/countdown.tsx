@@ -7,22 +7,26 @@ import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 export default function TimerCountdown() {
   const router = useRouter();
   const [time, setTime] = useState(5);
-  const [phase, setPhase] = useState<'PREP' | 'SWING'>('PREP');
+  const [phase, setPhase] = useState<'PREP' | 'SWING' | 'DONE'>('PREP');
+  const duration = phase === 'PREP' ? 5000 : 10000;
 
   useEffect(() => {
+    if (phase === 'DONE') {
+      router.push('/(tabs)/metrics');
+      return undefined;
+    }
+
+    const start = performance.now();
     const timerId = setInterval(() => {
-      setTime(prev => {
-        if (prev <= 0.01) {
-          clearInterval(timerId);
-          setPhase('SWING');
-          if (phase === 'PREP') {
-            setTime(10);
-          }
-          return 0;
-        }
-        return (prev - 0.01);
-      });
-    }, 10);
+      const elapsed = performance.now() - start;
+      const remaining = duration - elapsed;
+      setTime(remaining / 1000);
+
+    if (remaining <= 0) {
+      clearInterval(timerId);
+      setPhase(p => (p === 'PREP' ? 'SWING' : 'DONE'));
+    }
+  }, 10);
 
     return () => clearInterval(timerId);
   }, [phase]);
