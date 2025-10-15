@@ -39,11 +39,12 @@ export default function SettingsScreen() {
        <View style={styles.actionSection}>
         <Pressable
           onPress={() => router.push('/ble')}
-          style={[
+          style={({ pressed }) => [
             styles.primaryAction,
             {
               backgroundColor: palette.accent,
               shadowColor: colorScheme === 'dark' ? '#000000' : palette.accent,
+              opacity: pressed ? 0.8 : 1,
             },
           ]}
           accessibilityLabel="Connect a Bluetooth device"
@@ -60,11 +61,12 @@ export default function SettingsScreen() {
 
       <Pressable
           onPress={() => router.push('/calibration/wait')}
-          style={[
+          style={({ pressed }) => [
             styles.secondaryAction,
             {
               backgroundColor: palette.surface,
               borderColor: palette.surfaceMuted,
+              opacity: pressed ? 0.8 : 1,
             },
           ]}
           accessibilityLabel="Start lighting calibration"

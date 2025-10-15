@@ -43,11 +43,12 @@ export default function HomeScreen() {
             await startRecord();
             router.push('/metrics');
           }}
-          style={[
+          style={({ pressed }) => [
             styles.primaryAction,
             {
               backgroundColor: palette.accent,
               shadowColor: colorScheme === 'dark' ? '#000000' : palette.accent,
+              opacity: pressed ? 0.8 :1,
             },
           ]}
           accessibilityLabel="Start swing recording session">
@@ -62,11 +63,12 @@ export default function HomeScreen() {
 
         <Pressable
           onPress={() => router.push('/settings')}
-          style={[
+          style={({ pressed }) => [
             styles.secondaryAction,
             {
               backgroundColor: palette.surface,
               borderColor: palette.surfaceMuted,
+              opacity: pressed ? 0.8 : 1,
             },
           ]}
           accessibilityLabel="Open settings">

@@ -32,14 +32,15 @@ export default function BluetoothScreen() {
  
   return (
     <ThemedView style={[styles.container, { backgroundColor: 'transparent' }]}>
-      <GradientOverlay colors={palette.heroGradient} />
+      <GradientOverlay colors={palette.heroGradient} pointerEvents="none"/>
       <Pressable
         onPress={() => router.back()}
-        style={[
+        style={({ pressed }) => [
           styles.backButton,
           {
             borderColor: palette.surfaceMuted,
             backgroundColor: colorScheme === 'dark' ? palette.surface : `${palette.surface}F2`,
+            opacity: pressed ? 0.6 : 1,
           },
         ]}
         accessibilityLabel="Go back">
@@ -50,7 +51,7 @@ export default function BluetoothScreen() {
         />
       </Pressable>
 
-      <View style={styles.heroSection}>
+      <View style={styles.heroSection} pointerEvents="none">
         <GradientOverlay
           colors={[`${palette.accent}1A`, 'transparent']}
           style={styles.heroGlow}
@@ -72,11 +73,12 @@ export default function BluetoothScreen() {
       <View style={styles.actionSection}>
         <Pressable
           onPress={startScan}
-          style={[
+          style={({ pressed }) => [
             styles.primaryAction,
             {
               backgroundColor: palette.accent,
               shadowColor: colorScheme === 'dark' ? '#000000' : palette.accent,
+              opacity: pressed ? 0.8 : 1,
             },
           ]}
           accessibilityLabel="Start scanning for Bluetooth devices">
@@ -89,17 +91,14 @@ export default function BluetoothScreen() {
           </ThemedText>
         </Pressable>
 
-           {/* <View style={styles.startButton}>
-                <Button title="Start Recording" onPress={startRecord} />
-              </View> */}
-
         <Pressable
           onPress={stopScan}
-          style={[
+          style={({ pressed }) => [
             styles.secondaryAction,
             {
               backgroundColor: palette.surface,
               borderColor: palette.surfaceMuted,
+              opacity: pressed ? 0.8 : 1,
             },
           ]}
           accessibilityLabel="Stop scanning for Bluetooth devices">
@@ -119,7 +118,7 @@ export default function BluetoothScreen() {
           contentContainerStyle={styles.devicesList}
           ListEmptyComponent={
             <ThemedText style={styles.emptyState}>
-              No devices found yet. Start a scan to discover nearby trackers.
+              No devices found. Start a scan to discover nearby trackers.
             </ThemedText>
           }
           renderItem={({ item }) => (
