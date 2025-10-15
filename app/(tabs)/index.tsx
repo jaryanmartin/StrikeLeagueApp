@@ -3,15 +3,11 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import useBLE from '@/hooks/useBLE';
-
 export default function HomeScreen() {
   const router = useRouter();
-  const { startRecord } = useBLE();
 
   const colorScheme = useColorScheme() ?? 'light';
   const palette = Colors[colorScheme];
@@ -28,7 +24,7 @@ export default function HomeScreen() {
           end={{ x: 0.8, y: 1 }}
           pointerEvents="none"
         />
-        <Image source={require('@/assets/images/strike.png')} style={styles.logo} />
+        {/* <Image source={require('@/assets/images/strike.png')} style={styles.logo} /> */}
         <ThemedText type="title" style={styles.titleText}>
           Strike League
         </ThemedText>
@@ -40,8 +36,7 @@ export default function HomeScreen() {
       <View style={styles.actionSection}>
         <Pressable
           onPress={async () => {
-            await startRecord();
-            router.push('/metrics');
+            router.push('../countdown');
           }}
           style={({ pressed }) => [
             styles.primaryAction,

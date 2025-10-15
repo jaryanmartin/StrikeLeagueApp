@@ -35,6 +35,13 @@ export default function RootLayout() {
             headerShown: false,
           }}
         />
+        <Stack.Screen
+          name="countdown"
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+          }}
+        />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
