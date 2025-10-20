@@ -72,7 +72,6 @@ export default function HomeScreen() {
           </ThemedText>
         </Pressable>
       </View>
-
     </ThemedView>
   );
 }

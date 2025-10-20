@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     opacity: 0.85,
     marginTop: 12,
-  },
+},
   actionSection: {
     gap: 16,
   },
