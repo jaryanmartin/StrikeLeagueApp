@@ -34,7 +34,7 @@ jobs:
 
       - name: Lint
         #run: npx eslint . --max-warnings=0
-        run: npx eslint .
+        run: npx eslint . --quiet
 
       - name: Tests
         run: |
