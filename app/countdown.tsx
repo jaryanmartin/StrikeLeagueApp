@@ -14,6 +14,7 @@ export default function TimerCountdown() {
   const { startRecord } = useBLE();
   const [time, setTime] = useState(5);
   const [phase, setPhase] = useState<'WAITING' | 'PREP' | 'SWING' | 'DONE'>('WAITING');
+  const [actionHeight, setActionHeight] = useState(0);
   const duration = phase === 'PREP' ? 5000 : 10000;
   const insets = useSafeAreaInsets();
   const bottomGap = insets.bottom + 48;  
@@ -57,6 +58,17 @@ export default function TimerCountdown() {
     }
   }, [phase]);
 
+  const title =
+    phase === 'SWING'
+      ? 'Capturing Your Swing'
+      : 'Prepare to Swing';
+
+  const subtitle =
+    phase === 'SWING'
+      ? 'The recording is in progress, you have 10 seconds to complete your swing.'
+      : 'You have 5 seconds to set up after readying up, then recording starts automatically.';
+
+
   return (
     <ThemedView style={[styles.container, { backgroundColor: 'transparent'}]}>
       <GradientOverlay colors={palette.heroGradient} />
@@ -71,10 +83,10 @@ export default function TimerCountdown() {
         />
 
         <ThemedText type="title" style={styles.titleText}>
-          Prepare to Swing
+          {title}
         </ThemedText>
         <ThemedText style={styles.subtitle} type="subtitle">
-          You have 5 seconds to set up after readying up, then recording starts automatically.
+          {subtitle}
         </ThemedText>
       </View>
 
@@ -82,49 +94,58 @@ export default function TimerCountdown() {
         {time.toFixed(2)}
       </ThemedText>
 
-      <View style={[styles.actionSection, { marginBottom: bottomGap }]}>
-        <Pressable
-          onPress={async () => {
-            setPhase('PREP');
-          }}
-          style={({ pressed }) => [
-            styles.primaryAction,
-            {
-              backgroundColor: palette.accent,
-              shadowColor: colorScheme === 'dark' ? '#000000' : palette.accent,
-              opacity: pressed ? 0.8 :1,
-            },
-          ]}>
-          <ThemedText
-            type="defaultSemiBold"
-            style={styles.actionLabel}
-            lightColor={Colors.light.background}
-            darkColor={Colors.dark.background}>
-            Ready
-          </ThemedText>
-        </Pressable>
-
-        <Pressable
-          onPress={async () => {
-            router.back();
-          }}
-          style={({ pressed }) => [
-            styles.secondaryAction,
-            {
-              backgroundColor: palette.surface,
-              borderColor: palette.surfaceMuted,
-              opacity: pressed ? 0.8 : 1,
-            },
-          ]}
+      {phase !== 'SWING' ? (
+        <View
+          onLayout={e => setActionHeight(e.nativeEvent.layout.height)}
+          style={[styles.actionSection, { marginBottom: bottomGap }]}
         >
-          <ThemedText type="defaultSemiBold" style={styles.actionLabel}>
-            Cancel
-          </ThemedText>
-        </Pressable>
-      </View>
-    </ThemedView>
-  );
-}
+          {/* Ready */}
+          <Pressable
+            onPress={() => setPhase('PREP')}
+            style={({ pressed }) => [
+              styles.primaryAction,
+              {
+                backgroundColor: palette.accent,
+                shadowColor: colorScheme === 'dark' ? '#000000' : palette.accent,
+                opacity: pressed ? 0.8 : 1,
+              },
+            ]}
+          >
+            <ThemedText
+              type="defaultSemiBold"
+              style={styles.actionLabel}
+              lightColor={Colors.light.background}
+              darkColor={Colors.dark.background}
+            >
+              Ready
+            </ThemedText>
+          </Pressable>
+
+          {/* Cancel */}
+          <Pressable
+            onPress={() => router.back()}
+            style={({ pressed }) => [
+              styles.secondaryAction,
+              {
+                backgroundColor: palette.surface,
+                borderColor: palette.surfaceMuted,
+                opacity: pressed ? 0.8 : 1,
+              },
+            ]}
+          >
+            <ThemedText type="defaultSemiBold" style={styles.actionLabel}>
+              Cancel
+            </ThemedText>
+          </Pressable>
+        </View>
+      ) : (
+        // placeholder to keep layout identical during SWING
+        <View style={{ height: Math.max(actionHeight, 1), marginBottom: bottomGap }} />
+      )}
+
+          </ThemedView>
+        );
+      }
 
 const styles = StyleSheet.create({
   container: {
@@ -159,10 +180,15 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   status: {
-    fontSize: 25,
+    fontSize: 50,
+    fontWeight: '600',
     color: 'white',
     textAlign: 'center',
     maxWidth: 420,
+    lineHeight: 110,
+    letterSpacing: 1,
+    includeFontPadding: false, 
+    textAlignVertical: 'center',   
   },
   actionSection: {
     gap: 16,
