@@ -1,0 +1,1 @@
+export const VIRTUAL_DEVICE_NAME = 'group17rpi';

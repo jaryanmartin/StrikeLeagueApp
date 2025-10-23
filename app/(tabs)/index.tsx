@@ -1,3 +1,4 @@
+import BLEStatusChip from '@/components/BLEStatusChip';
 import { GradientOverlay } from '@/components/GradientOverlay';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -5,7 +6,6 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
-
 export default function HomeScreen() {
   const router = useRouter();
 
@@ -15,7 +15,7 @@ export default function HomeScreen() {
   return (
     <ThemedView style={[styles.container, { backgroundColor: 'transparent' }]}> 
       <GradientOverlay colors={palette.heroGradient} />
-
+      
       <View style={styles.heroSection}>
         <GradientOverlay
           colors={[`${palette.accent}1A`, 'transparent']}
@@ -31,6 +31,10 @@ export default function HomeScreen() {
         <ThemedText style={styles.subtitle} type="subtitle">
           Track every swing with precision metrics and tailored insights.
         </ThemedText>
+      </View>
+
+      <View style={{ width: '100%', alignItems: 'flex-end' }}>
+        <BLEStatusChip />
       </View>
 
       <View style={styles.actionSection}>
