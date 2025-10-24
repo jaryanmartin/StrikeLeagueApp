@@ -1,38 +1,29 @@
+import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { GradientOverlay } from '@/components/GradientOverlay';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { Colors } from '@/constants/Colors';
 import useBLE from '@/hooks/useBLE';
-import { useRouter } from 'expo-router';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 const SUCCESS_VALUES = new Set(['success', 'completed', 'done', 'ok', 'true', '1']);
 
 const isSuccessValue = (raw: string) => {
   const trimmed = raw.trim();
-
-  if (!trimmed) {
-    return false;
-  }
-
+  if (!trimmed) return false;
   const normalized = trimmed.toLowerCase();
-
-  if (SUCCESS_VALUES.has(normalized)) {
-    return true;
-  }
-
+  if (SUCCESS_VALUES.has(normalized)) return true;
   try {
     const parsed = JSON.parse(trimmed);
-    if (typeof parsed === 'object' && parsed !== null) {
+    if (parsed && typeof parsed === 'object') {
       const status = 'status' in parsed ? String((parsed as Record<string, unknown>).status ?? '') : '';
-      if (SUCCESS_VALUES.has(status.trim().toLowerCase())) {
-        return true;
-      }
+      if (SUCCESS_VALUES.has(status.trim().toLowerCase())) return true;
     }
-  } catch {
-    // Ignore JSON parse errors and treat value as plain text.
-  }
-
+  } catch {}
   return false;
 };
 
@@ -40,52 +31,72 @@ export default function LightingCalibrationWaitScreen() {
   const router = useRouter();
   const { monitorLightingCalibration, connectedDevice } = useBLE();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const colorScheme = useColorScheme() ?? 'light';
+  const palette = Colors[colorScheme];
+  const insets = useSafeAreaInsets();
+  const bottomGap = insets.bottom + 48;
+  const [actionHeight, setActionHeight] = useState(0);
 
   useEffect(() => {
-    if (!connectedDevice) {
-      return undefined;
-    }
-
+    if (!connectedDevice) return;
     setErrorMessage(null);
-
     const unsubscribe = monitorLightingCalibration(
       (value) => {
-        if (isSuccessValue(value)) {
-          router.replace('/calibration/success');
-        }
+        if (isSuccessValue(value)) router.replace('/calibration/success');
       },
       () => {
         setErrorMessage('Unable to monitor lighting calibration.');
-      },
+      }
     );
-
     return unsubscribe;
   }, [connectedDevice, monitorLightingCalibration, router]);
 
   const statusText = useMemo(() => {
-    if (!connectedDevice) {
-      return 'Please allow your Strike League device to finish lighting calibration.';
-    }
-
-    if (errorMessage) {
-      return errorMessage;
-    }
-
+    if (!connectedDevice) return 'Connect to your Strike League device to start lighting calibration.';
+    if (errorMessage) return errorMessage;
     return 'Monitoring for calibration status...';
   }, [connectedDevice, errorMessage]);
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText style={styles.title}>Calibrating Lighting. Please Wait!</ThemedText>
+    <ThemedView style={[styles.container, { backgroundColor: 'transparent' }]}>
+      <GradientOverlay colors={palette.heroGradient} />
+      <View style={styles.heroSection}>
+        <GradientOverlay
+          colors={[`${palette.accent}1A`, 'transparent']}
+          style={styles.heroGlow}
+          start={{ x: 0.2, y: 0 }}
+          end={{ x: 0.8, y: 1 }}
+          pointerEvents="none"
+        />
+        <ThemedText type="title" style={styles.titleText}>
+          Calibrating Lighting
+        </ThemedText>
+        <ThemedText style={styles.subtitle} type="subtitle">
+          Please wait while we adjust the camera exposure for your environment.
+        </ThemedText>
+      </View>
       <ActivityIndicator style={styles.spinner} color="white" size="large" />
-      <ThemedText style={styles.status}>
-        {statusText}
-      </ThemedText>
-      <Pressable
-        style={[styles.actionButton, styles.cancelButton]}
-        onPress={() => router.replace('/settings')}>
-        <ThemedText style={styles.actionButtonText}>Cancel</ThemedText>
-      </Pressable>
+      <ThemedText style={styles.status}>{statusText}</ThemedText>
+      <View
+        onLayout={e => setActionHeight(e.nativeEvent.layout.height)}
+        style={[styles.actionSection, { marginBottom: bottomGap }]}
+      >
+        <Pressable
+          onPress={() => router.replace('/settings')}
+          style={({ pressed }) => [
+            styles.secondaryAction,
+            {
+              backgroundColor: palette.surface,
+              borderColor: palette.surfaceMuted,
+              opacity: pressed ? 0.8 : 1,
+            },
+          ]}
+        >
+          <ThemedText type="defaultSemiBold" style={styles.actionLabel}>
+            Cancel
+          </ThemedText>
+        </Pressable>
+      </View>
     </ThemedView>
   );
 }
@@ -93,42 +104,57 @@ export default function LightingCalibrationWaitScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 64,
+    paddingTop: 72,
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+    justifyContent: 'space-between',
   },
-  title: {
-    fontSize: 36,
-    color: 'white',
-    fontFamily: 'StrikeLeagueBold',
+  heroSection: {
+    alignItems: 'center',
+    marginTop: 16,
+    paddingBottom: 24,
+  },
+  heroGlow: {
+    position: 'absolute',
+    top: -120,
+    left: -120,
+    right: -120,
+    height: 320,
+    borderRadius: 240,
+  },
+  titleText: {
+    textTransform: 'uppercase',
+    letterSpacing: 6,
     textAlign: 'center',
-    lineHeight: 45
+  },
+  subtitle: {
+    maxWidth: 320,
+    textAlign: 'center',
+    opacity: 0.85,
+    marginTop: 12,
   },
   spinner: {
-    marginTop: 16,
+    alignSelf: 'center',
+    marginTop: 8,
   },
   status: {
     fontSize: 18,
     color: 'white',
     textAlign: 'center',
     maxWidth: 420,
+    alignSelf: 'center',
   },
-  actionButton: {
-    marginTop: 24,
+  actionSection: {
+    gap: 16,
+  },
+  secondaryAction: {
     borderRadius: 20,
-    borderWidth: 3,
-    borderColor: 'black',
-    paddingVertical: 12,
-    paddingHorizontal: 48,
-    backgroundColor: '#FFD9D9',
+    paddingVertical: 18,
+    alignItems: 'center',
+    borderWidth: 1,
   },
-  actionButtonText: {
+  actionLabel: {
     fontSize: 18,
-    fontWeight: '600',
-    color: 'black',
-  },
-  cancelButton: {
-    backgroundColor: '#FFD9D9',
+    letterSpacing: 0.3,
   },
 });
