@@ -17,10 +17,9 @@ import {
 const DATA_SERVICE_UUID = "96f0284d-8895-4c08-baaf-402a2f7e8c5b";
 const METRIC_CHARACTERISTIC_UUID = "d9c146d3-df83-49ec-801d-70494060d6d8";
 const FEEDBACK_CHARACTERISTIC_UUID = "2c58a217-0a9b-445f-adac-0b37bd8635c3";
-// const LAUNCH_MONITOR_CHARACTERISTIC_UUID = "449145fa-bad8-4b71-8094-44089b2c29b9";
-const LIGHTING_CHARACTERISTIC_UUID = "712da68d-cc4e-423e-b818-3f4cdf3a712a";
+const LIGHTING_CHARACTERISTIC_UUID = "778c5d1a-315f-4baf-a23b-6429b84835e3";
 
-const VIRTUAL_DEVICE_NAME = "group17rpi"; 
+const VIRTUAL_DEVICE_NAME = "group17rp"; 
 
 const bleManager = new BleManager();
 
@@ -153,33 +152,22 @@ function useBLE() {
         const data = JSON.parse(raw);
         console.log("Received BLE data:", data);
 
-        if (typeof data["face angle"] === "number") {
-          setFaceAngle(data["face angle"]);
+        const t = typeof data?.type === "string" ? data.type.toLowerCase() : "";
+
+        if (t === "metrics") {
+          if (typeof data["face angle"] === "number") setFaceAngle(data["face angle"]);
+          if (typeof data["swing path"] === "number") setSwingPath(data["swing path"]);
+          if (typeof data["attack angle"] === "number") setAttackAngle(data["attack angle"]);
+          if (typeof data["side angle"] === "number") setSideAngle(data["side angle"]);
+          setTime(new Date());
+        } else {
+          setFeedback(raw);
         }
-
-        if (typeof data["swing path"] === "number") {
-          setSwingPath(data["swing path"]);
-        }
-
-        if (typeof data["attack angle"] === "number") {
-          setAttackAngle(data["attack angle"]);
-        }
-
-        if (typeof data["side angle"] === "number") {
-          setSideAngle(data["side angle"]);
-        }
-
-        setTime(new Date());
-
-
       } catch (err) {
         console.error("Failed to parse BLE JSON:", err);
       }
-     } else if ( characteristic.uuid === FEEDBACK_CHARACTERISTIC_UUID ) 
-      {
-        setFeedback(raw);
-      }
-  };
+    }
+  }
 
   const startStreamingData = async (device: Device) => {
     if (device) {
@@ -204,15 +192,6 @@ function useBLE() {
       console.error("No device connected.");
       return;
     }
-
-    // const { isLightingCalibrated } = useBleStore.getState();
-    // if (!isLightingCalibrated) {
-    //   Alert.alert(
-    //     "Calibrate lighting",
-    //     "Please calibrate the lighting before starting a recording."
-    //   );
-    //   return;
-    // }
 
   const message = "START";
   const base64 = Buffer.from(message, 'utf-8').toString('base64');
@@ -315,10 +294,23 @@ function useBLE() {
         LIGHTING_CHARACTERISTIC_UUID,
         (error, characteristic) => {
           if (error) {
+            const anyErr = error as any;
+            const code = anyErr?.errorCode ?? anyErr?.code ?? anyErr?.status;
+            const msg  = String(anyErr?.message ?? "").toLowerCase();
+
+            if (
+              code === 201 ||
+              code === 205 ||
+              msg.includes("cancel")
+            ) {
+              return;
+            }
+
             console.error("Lighting calibration monitor error:", error);
             onError?.(error);
             return;
           }
+
 
           if (!characteristic?.value) {
             return;

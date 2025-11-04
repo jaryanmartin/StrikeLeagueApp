@@ -1,31 +1,14 @@
-import { useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 import { GradientOverlay } from '@/components/GradientOverlay';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import useBLE from '@/hooks/useBLE';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useRouter } from 'expo-router';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const SUCCESS_VALUES = new Set(['success', 'completed', 'done', 'ok', 'true', '1']);
-
-const isSuccessValue = (raw: string) => {
-  const trimmed = raw.trim();
-  if (!trimmed) return false;
-  const normalized = trimmed.toLowerCase();
-  if (SUCCESS_VALUES.has(normalized)) return true;
-  try {
-    const parsed = JSON.parse(trimmed);
-    if (parsed && typeof parsed === 'object') {
-      const status = 'status' in parsed ? String((parsed as Record<string, unknown>).status ?? '') : '';
-      if (SUCCESS_VALUES.has(status.trim().toLowerCase())) return true;
-    }
-  } catch {}
-  return false;
-};
 
 export default function LightingCalibrationWaitScreen() {
   const router = useRouter();
@@ -36,20 +19,34 @@ export default function LightingCalibrationWaitScreen() {
   const insets = useSafeAreaInsets();
   const bottomGap = insets.bottom + 48;
   const [actionHeight, setActionHeight] = useState(0);
+  const mountedRef = useRef(true);
 
-  useEffect(() => {
-    if (!connectedDevice) return;
-    setErrorMessage(null);
-    const unsubscribe = monitorLightingCalibration(
-      (value) => {
-        if (isSuccessValue(value)) router.replace('/calibration/success');
-      },
-      () => {
-        setErrorMessage('Unable to monitor lighting calibration.');
+useEffect(() => {
+  mountedRef.current = true;
+
+  const unsubscribe = monitorLightingCalibration(
+    (value) => {
+      if (!mountedRef.current) return;
+      if (value.trim().toLowerCase() === 'success') {
+        unsubscribe?.();
+        router.replace('/calibration/success');
       }
-    );
-    return unsubscribe;
-  }, [connectedDevice, monitorLightingCalibration, router]);
+    },
+    (err) => {
+      if (!mountedRef.current) return;
+      setErrorMessage('Unable to monitor lighting calibration.');
+    }
+  );
+
+  return () => {
+    mountedRef.current = false;
+    unsubscribe?.();
+  };
+}, [connectedDevice]);
+
+  const handleCancel = () => {
+    router.replace('/settings');
+  };
 
   const statusText = useMemo(() => {
     if (!connectedDevice) return 'Connect to your Strike League device to start lighting calibration.';
@@ -82,7 +79,7 @@ export default function LightingCalibrationWaitScreen() {
         style={[styles.actionSection, { marginBottom: bottomGap }]}
       >
         <Pressable
-          onPress={() => router.replace('/settings')}
+          onPress={handleCancel}
           style={({ pressed }) => [
             styles.secondaryAction,
             {

@@ -3,15 +3,19 @@ import { GradientOverlay } from '@/components/GradientOverlay';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
+import useBLE from '@/hooks/useBLE';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
+
 export default function HomeScreen() {
   const router = useRouter();
 
   const colorScheme = useColorScheme() ?? 'light';
   const palette = Colors[colorScheme];
-  
+
+  const { startRecord, connectedDevice } = useBLE();
+
   return (
     <ThemedView style={[styles.container, { backgroundColor: 'transparent' }]}> 
       <GradientOverlay colors={palette.heroGradient} />
@@ -40,7 +44,8 @@ export default function HomeScreen() {
       <View style={styles.actionSection}>
         <Pressable
           onPress={async () => {
-            router.push('../countdown');
+            await startRecord();
+            router.push('/metrics');
           }}
           style={({ pressed }) => [
             styles.primaryAction,
@@ -56,7 +61,7 @@ export default function HomeScreen() {
             style={styles.actionLabel}
             lightColor={Colors.light.background}
             darkColor={Colors.dark.background}>
-            Start Recording
+            Begin Session
           </ThemedText>
         </Pressable>
 
