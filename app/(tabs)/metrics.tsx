@@ -1,13 +1,15 @@
+import { GradientOverlay } from '@/components/GradientOverlay';
 import MetricCard from '@/components/metrics/MetricCard';
 import SkeletonLoader from '@/components/metrics/SkeletonLoader';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { Colors } from '@/constants/Colors';
 import useBLE from '@/hooks/useBLE';
 import type { BleState } from '@/stores/bleStores';
 import { useBleStore } from '@/stores/bleStores';
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, StyleSheet, useColorScheme, View } from 'react-native';
 
 const safeLocaleString = (value: Date | string | number | null | undefined) => {
   if (!value) {
@@ -52,6 +54,9 @@ type EnhancedMetric = MetricConfig & {
 };
 
 export default function MetricScreen() {
+
+  const colorScheme = useColorScheme() ?? 'light';
+  const palette = Colors[colorScheme];
   const faceAngle = useBleStore((state: BleState) => state.faceAngle);
   const swingPath = useBleStore((state: BleState) => state.swingPath);
   const sideAngle = useBleStore((state: BleState) => state.sideAngle);
@@ -172,8 +177,19 @@ export default function MetricScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <ThemedView style={styles.container}>
-        <ThemedText style={styles.titleText}>Swing Analytics</ThemedText>
+      <GradientOverlay colors={palette.heroGradient} />
+      <View style={[styles.heroSection, { paddingTop: 48 }]}>
+        <GradientOverlay
+          colors={[`${palette.accent}1A`, 'transparent']}
+          style={styles.heroGlow}
+          start={{ x: 0.2, y: 0 }}
+          end={{ x: 0.8, y: 1 }}
+          pointerEvents="none"
+        />
+        <ThemedText type="title" style={styles.titleText}>
+          Swing Analytics
+        </ThemedText>
+      </View>
 
         <ThemedView style={styles.feedbackCard}>
           <View style={styles.sectionHeader}>
@@ -228,7 +244,6 @@ export default function MetricScreen() {
             );
           }}
         />
-      </ThemedView>
     </ScrollView>
   );
 }
@@ -244,19 +259,16 @@ const styles = StyleSheet.create({
     paddingTop: 80,
   },
   titleText: {
-    fontSize: 40,
-    fontFamily: 'StrikeLeagueBold',
+    textTransform: 'uppercase',
+    letterSpacing: 6,
     textAlign: 'center',
-    color: 'white',
-    marginBottom: 32,
-    lineHeight: 55,
-  },
+},
   feedbackCard: {
     borderRadius: 20,
     padding: 24,
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
     marginBottom: 20,
-    marginTop: 50,
+    marginTop: 16,
     gap: 16,
   },
   sectionHeader: {
@@ -310,5 +322,18 @@ const styles = StyleSheet.create({
   },
   metricWrapperLastRow: {
     marginBottom: 0,
+  },
+  heroSection: {
+    alignItems: 'center',
+    marginTop: 16,
+    paddingBottom: 24,
+  },
+  heroGlow: {
+    position: 'absolute',
+    top: -120,
+    left: -120,
+    right: -120,
+    height: 320,
+    borderRadius: 240,
   },
 });

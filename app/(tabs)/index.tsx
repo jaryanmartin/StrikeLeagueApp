@@ -28,7 +28,6 @@ export default function HomeScreen() {
           end={{ x: 0.8, y: 1 }}
           pointerEvents="none"
         />
-        {/* <Image source={require('@/assets/images/strike.png')} style={styles.logo} /> */}
         <ThemedText type="title" style={styles.titleText}>
           Strike League
         </ThemedText>

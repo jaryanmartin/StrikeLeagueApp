@@ -1,10 +1,7 @@
-/* eslint-disable no-bitwise */
 import { useBleStore } from '@/stores/bleStores';
 import { Buffer } from 'buffer';
 import { useState } from "react";
 import { PermissionsAndroid, Platform } from "react-native";
-
-// import * as ExpoDevice from "expo-device";
 
 import {
   BleError,
@@ -19,7 +16,7 @@ const METRIC_CHARACTERISTIC_UUID = "d9c146d3-df83-49ec-801d-70494060d6d8";
 const FEEDBACK_CHARACTERISTIC_UUID = "2c58a217-0a9b-445f-adac-0b37bd8635c3";
 const LIGHTING_CHARACTERISTIC_UUID = "778c5d1a-315f-4baf-a23b-6429b84835e3";
 
-const VIRTUAL_DEVICE_NAME = "group17rp"; 
+const VIRTUAL_DEVICE_NAME = "Company17_Rpi5"; 
 
 const bleManager = new BleManager();
 
