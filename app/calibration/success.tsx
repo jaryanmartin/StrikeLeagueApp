@@ -1,21 +1,36 @@
-import { Pressable, StyleSheet } from 'react-native';
-
+import { GradientOverlay } from '@/components/GradientOverlay';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { Colors } from '@/constants/Colors';
 import { useRouter } from 'expo-router';
+import { Pressable, StyleSheet, useColorScheme, View } from 'react-native';
 
 export default function LightingCalibrationSuccessScreen() {
   const router = useRouter();
+  const colorScheme = useColorScheme() ?? 'light';
+  const palette = Colors[colorScheme];
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText style={styles.title}>Lighting Calibration Complete!</ThemedText>
-      <ThemedText style={styles.message}>
-        Your lighting calibration finished successfully. You can return to the home screen to continue.
-      </ThemedText>
-      <Pressable style={styles.actionButton} onPress={() => router.replace('/settings')}>
-        <ThemedText style={styles.actionButtonText}>Okay</ThemedText>
-      </Pressable>
+    <ThemedView style={[styles.container, { backgroundColor: 'transparent' }]}>
+      <GradientOverlay colors={palette.heroGradient} />
+      <View style={styles.heroSection}>
+        <GradientOverlay
+          colors={[`${palette.accent}1A`, 'transparent']}
+          style={styles.heroGlow}
+          start={{ x: 0.2, y: 0 }}
+          end={{ x: 0.8, y: 1 }}
+          pointerEvents="none"
+        />
+        <ThemedText type="title" style={styles.titleText}>
+          Lighting Calibration Complete!
+        </ThemedText>
+        <ThemedText style={styles.subtitle} type="subtitle">
+          Your lighting calibration finished successfully. You can return to the home screen to continue.
+        </ThemedText>
+        <Pressable style={styles.actionButton} onPress={() => router.replace('/settings')}>
+          <ThemedText style={styles.actionButtonText}>Okay</ThemedText>
+        </Pressable>
+      </View>
     </ThemedView>
   );
 }
@@ -29,17 +44,16 @@ const styles = StyleSheet.create({
     gap: 50,
     paddingVertical: 100,
   },
-  title: {
-    fontSize: 32,
-    color: 'white',
-    fontFamily: 'StrikeLeagueBold',
+  titleText: {
+    textTransform: 'uppercase',
+    letterSpacing: 6,
     textAlign: 'center',
   },
-  message: {
-    fontSize: 18,
-    color: 'white',
+  subtitle: {
+    maxWidth: 320,
     textAlign: 'center',
-    maxWidth: 420,
+    opacity: 0.85,
+    marginTop: 12,
   },
   actionButton: {
     borderRadius: 20,
@@ -53,5 +67,18 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: 'black',
+  },
+  heroSection: {
+    alignItems: 'center',
+    marginTop: 16,
+    paddingBottom: 24,
+  },
+  heroGlow: {
+    position: 'absolute',
+    top: -120,
+    left: -120,
+    right: -120,
+    height: 320,
+    borderRadius: 240,
   },
 });
