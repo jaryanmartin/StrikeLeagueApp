@@ -1,10 +1,11 @@
 import { GradientOverlay } from '@/components/GradientOverlay';
 import MetricCard from '@/components/metrics/MetricCard';
+import MetricInfoSheet from '@/components/metrics/MetricInfoSheet';
 import SkeletonLoader from '@/components/metrics/SkeletonLoader';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
-import useBLE from '@/hooks/useBLE';
+import type { MetricKey } from '@/constants/metricInfo';
 import type { BleState } from '@/stores/bleStores';
 import { useBleStore } from '@/stores/bleStores';
 import { Ionicons } from '@expo/vector-icons';
@@ -34,7 +35,7 @@ const safeLocaleString = (value: Date | string | number | null | undefined) => {
 
 const HISTORY_LENGTH = 20;
 
-type MetricKey = 'faceAngle' | 'swingPath' | 'sideAngle' | 'attackAngle';
+// type MetricKey = 'faceAngle' | 'swingPath' | 'sideAngle' | 'attackAngle';
 
 type MetricHistory = Partial<Record<MetricKey, number[]>>;
 
@@ -64,9 +65,15 @@ export default function MetricScreen() {
   const time = useBleStore((state: BleState) => state.time);
 
   const feedback = useBleStore((state: BleState) => state.feedback);
-  const { readFeedback } = useBLE();
+  // const { readFeedback } = useBLE();
 
   const [metricHistory, setMetricHistory] = useState<MetricHistory>({});
+
+  const [infoMetric, setInfoMetric] = useState<MetricKey | null>(null);
+  const [infoVisible, setInfoVisible] = useState(false);
+
+  const openInfo = (key: MetricKey) => { setInfoMetric(key); setInfoVisible(true); };
+  const closeInfo = () => setInfoVisible(false);
 
   const appendHistory = useCallback((key: MetricKey, value: number | null | undefined) => {
     if (value === null || value === undefined) {
@@ -116,12 +123,12 @@ export default function MetricScreen() {
         history: metricHistory.swingPath ?? [],
       },
       {
-        key: 'swingPath' as const,
-        label: 'Swing Path',
-        value: swingPath,
+        key: 'sideAngle' as const,
+        label: 'Side Angle',
+        value: sideAngle,
         unit: '°',
         range: { min: -40, max: 40 },
-        history: metricHistory.swingPath ?? [],
+        history: metricHistory.sideAngle ?? [],
       },
       {
         key: 'attackAngle' as const,
@@ -209,10 +216,6 @@ export default function MetricScreen() {
               <ThemedText style={styles.timestamp}>Updated {formattedTimestamp}</ThemedText>
             </View>
           ) : null}
-          <Pressable onPress={readFeedback} style={styles.refreshButton} accessibilityLabel="Refresh feedback">
-            <Ionicons name="refresh" size={20} color="white" />
-            <ThemedText style={styles.refreshLabel}>Refresh</ThemedText>
-          </Pressable>
         </ThemedView>
 
         <FlatList<EnhancedMetric>
@@ -240,9 +243,21 @@ export default function MetricScreen() {
                   range={item.range}
                   isLoading={item.isLoading}
                 />
+                <Pressable
+                  onPress={() => openInfo(item.key as MetricKey)}
+                  style={{ position: 'absolute', top: 8, right: 8, padding: 6 }}
+                  accessibilityLabel={`More info about ${item.label}`}
+                >
+                  <Ionicons name="information-circle-outline" size={20} color ="white" />
+                </Pressable>
               </View>
             );
           }}
+        />
+        <MetricInfoSheet
+          metric={infoMetric}
+          visible={infoVisible}
+          onClose={closeInfo}
         />
     </ScrollView>
   );

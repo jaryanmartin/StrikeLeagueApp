@@ -1,6 +1,6 @@
 import { useBleStore } from '@/stores/bleStores';
 import { Buffer } from 'buffer';
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { PermissionsAndroid, Platform } from "react-native";
 
 import {
@@ -15,6 +15,8 @@ const DATA_SERVICE_UUID = "96f0284d-8895-4c08-baaf-402a2f7e8c5b";
 const METRIC_CHARACTERISTIC_UUID = "d9c146d3-df83-49ec-801d-70494060d6d8";
 const FEEDBACK_CHARACTERISTIC_UUID = "2c58a217-0a9b-445f-adac-0b37bd8635c3";
 const LIGHTING_CHARACTERISTIC_UUID = "778c5d1a-315f-4baf-a23b-6429b84835e3";
+const STOP_LOOP_CHARACTERISTIC_UUID = "8f1a5ff0-399b-4afe-9cb4-280c8310e388";
+const BATTERY_CHARACTERISTIC_UUID = 'a834f0f7-89cc-453b-8be4-2905d27344bf';
 
 const VIRTUAL_DEVICE_NAME = "group17rpi"; 
 
@@ -24,6 +26,7 @@ function useBLE() {
   const [allDevices, setAllDevices] = useState<Device[]>([]);
   const connectedDevice = useBleStore((state) => state.connectedDevice);
   const setConnectedDevice = useBleStore((state) => state.setConnectedDevice);
+  const setBatteryLevel = useBleStore((s) => s.setBatteryLevel);
   const {
   setFaceAngle,
   setSwingPath,
@@ -32,6 +35,8 @@ function useBLE() {
   setFeedback,
   setTime,
 } = useBleStore.getState();
+const scanningRef = useRef<boolean>(false);
+let isScanning = false;
 
   const requestAndroid31Permissions = async () => {
     const bluetoothScanPermission = await PermissionsAndroid.request(
@@ -127,6 +132,27 @@ function useBLE() {
       }
     });
 
+//     const startScan = () => {
+//   if (isScanning) return;
+//   isScanning = true;
+
+//   bleManager.startDeviceScan(
+//     null,
+//     { allowDuplicates: false },
+//     (err, device) => {
+//       if (err) { console.warn('scan error:', err); stopScan(); return; }
+//       if (!device) return;
+
+//       // filter to your device(s) if desired
+//       const name = device.localName ?? device.name ?? '';
+//       if (name !== VIRTUAL_DEVICE_NAME) return;
+
+//       // upsert in global store (see store impl below)
+//       useBleStore.getState().upsertDevice(device);
+//     }
+//   );
+// };
+
   const onDataUpdate = (
     error: BleError | null,
     characteristic: Characteristic | null
@@ -164,6 +190,17 @@ function useBLE() {
         console.error("Failed to parse BLE JSON:", err);
       }
     }
+
+    else if ( characteristic.uuid === BATTERY_CHARACTERISTIC_UUID) 
+    {
+      try {
+        const parsed = JSON.parse(raw);
+        setBatteryLevel(parsed);
+
+      } catch (err) {
+        console.error("Failed to parse BLE JSON:", err);
+      }
+    }
   }
 
   const startStreamingData = async (device: Device) => {
@@ -172,6 +209,12 @@ function useBLE() {
       device.monitorCharacteristicForService(
         DATA_SERVICE_UUID,
         METRIC_CHARACTERISTIC_UUID, 
+        onDataUpdate
+      );
+
+      device.monitorCharacteristicForService(
+        DATA_SERVICE_UUID,
+        BATTERY_CHARACTERISTIC_UUID, 
         onDataUpdate
       );
 
@@ -198,6 +241,28 @@ function useBLE() {
       connectedDevice.id,
       DATA_SERVICE_UUID,
       METRIC_CHARACTERISTIC_UUID,
+      base64
+    );
+    console.log("START command sent.");
+    } catch (error) {
+      console.error("Failed to send START:", error);
+    }
+  };
+
+  const stopSession = async() => {
+    if (!connectedDevice) {
+      console.error("No device connected.");
+      return;
+    }
+
+  const message = "END";
+  const base64 = Buffer.from(message, 'utf-8').toString('base64');
+
+  try {
+    await bleManager.writeCharacteristicWithoutResponseForDevice(
+      connectedDevice.id,
+      DATA_SERVICE_UUID,
+      STOP_LOOP_CHARACTERISTIC_UUID,
       base64
     );
     console.log("START command sent.");
@@ -254,24 +319,24 @@ function useBLE() {
   //   }
   // };
 
-  const readFeedback = async () => {
-    if (!connectedDevice) {
-      console.error("No device connected.");
-      return;
-    }
+  // const readFeedback = async () => {
+  //   if (!connectedDevice) {
+  //     console.error("No device connected.");
+  //     return;
+  //   }
 
-    try {
-      const characteristic = await bleManager.readCharacteristicForDevice(
-        connectedDevice.id,
-        DATA_SERVICE_UUID,
-        FEEDBACK_CHARACTERISTIC_UUID
-      );
-      const raw = Buffer.from(characteristic?.value ?? '', 'base64').toString('utf-8');
-      setFeedback(raw);
-    } catch (error) {
-      console.error("Failed to read feedback:", error);
-    }
-  };
+  //   try {
+  //     const characteristic = await bleManager.readCharacteristicForDevice(
+  //       connectedDevice.id,
+  //       DATA_SERVICE_UUID,
+  //       FEEDBACK_CHARACTERISTIC_UUID
+  //     );
+  //     const raw = Buffer.from(characteristic?.value ?? '', 'base64').toString('utf-8');
+  //     setFeedback(raw);
+  //   } catch (error) {
+  //     console.error("Failed to read feedback:", error);
+  //   }
+  // };
 
   const monitorLightingCalibration = (
     onValue: (value: string) => void,
@@ -333,37 +398,6 @@ function useBLE() {
     };
   };
 
-  //   return () => {
-  //     try {
-  //       subscription?.remove();
-  //     } catch (error) {
-  //       console.warn("Failed to stop distance calibration monitor:", error);
-  //     }
-  //   };
-  // };
-
-  // const turnOffLaunchMonitor = async () => {
-  //   if (!connectedDevice) {
-  //     console.error("No device connected.");
-  //     return;
-  //   }
-
-  //   const message = "0";
-  //   const base64 = Buffer.from(message, 'utf-8').toString('base64');
-
-  //   try {
-  //     await bleManager.writeCharacteristicWithoutResponseForDevice(
-  //       connectedDevice.id,
-  //       DATA_SERVICE_UUID,
-  //       LAUNCH_MONITOR_CHARACTERISTIC_UUID,
-  //       base64
-  //     );
-  //     console.log("Launch monitor off command sent.");
-  //   } catch (error) {
-  //     console.error("Failed to send launch monitor off command:", error);
-  //   }
-  // };
-
   return {
     connectToDevice,
     allDevices,
@@ -373,9 +407,8 @@ function useBLE() {
     startStreamingData,
     stopScan,
     startRecord,
-    readFeedback,
-    // turnOffLaunchMonitor,
     calibrateLighting,
+    stopSession,
     monitorLightingCalibration,
   };
 }

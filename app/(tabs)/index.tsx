@@ -14,7 +14,7 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const palette = Colors[colorScheme];
 
-  const { startRecord, connectedDevice } = useBLE();
+  const { startRecord,stopSession, connectedDevice } = useBLE();
 
   return (
     <ThemedView style={[styles.container, { backgroundColor: 'transparent' }]}> 
@@ -65,7 +65,7 @@ export default function HomeScreen() {
         </Pressable>
 
         <Pressable
-          onPress={() => router.push('/settings')}
+          onPress={async () => await stopSession()}
           style={({ pressed }) => [
             styles.secondaryAction,
             {
@@ -74,9 +74,9 @@ export default function HomeScreen() {
               opacity: pressed ? 0.8 : 1,
             },
           ]}
-          accessibilityLabel="Open settings">
+          accessibilityLabel="Cancel Session">
           <ThemedText type="defaultSemiBold" style={styles.actionLabel}>
-            Settings
+            Cancel Session
           </ThemedText>
         </Pressable>
       </View>

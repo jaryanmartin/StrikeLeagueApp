@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function LightingCalibrationWaitScreen() {
   const router = useRouter();
-  const { monitorLightingCalibration, connectedDevice } = useBLE();
+  const { monitorLightingCalibration, calibrateLighting, connectedDevice } = useBLE();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const colorScheme = useColorScheme() ?? 'light';
   const palette = Colors[colorScheme];
@@ -22,26 +22,80 @@ export default function LightingCalibrationWaitScreen() {
   const mountedRef = useRef(true);
 
 useEffect(() => {
+  if (!connectedDevice) return;
+
   mountedRef.current = true;
 
+  let unsubCalled = false;
+  const safeUnsub = () => {
+    if (!unsubCalled) {
+      unsubCalled = true;
+      unsubscribe?.();
+    }
+  };
+
+  let navigated = false;
+  const goSuccess = () => {
+    if (navigated || !mountedRef.current) return;
+    navigated = true;
+    safeUnsub();
+    router.replace('/calibration/success');
+  };
+
+  // 1) Subscribe first
   const unsubscribe = monitorLightingCalibration(
-    (value) => {
+    (raw) => {
       if (!mountedRef.current) return;
-      if (value.trim().toLowerCase() === 'success') {
-        unsubscribe?.();
-        router.replace('/calibration/success');
+
+      // DEBUG: see exactly what we get
+      console.log('[calib status raw]:', raw);
+
+      // If your hook already returns plain UTF-8 text, keep it simple:
+      let text = String(raw);
+
+      // If your hook returns base64 (react-native-ble-plx default), decode it:
+      try {
+        if (/^[A-Za-z0-9+/=]+$/.test(text)) {
+          // heuristic; remove if your hook already decodes
+          // @ts-ignore Buffer is polyfilled in your project; otherwise import a b64 decoder
+          text = Buffer.from(text, 'base64').toString('utf8');
+        }
+      } catch {}
+
+      const trimmed = text.trim().toLowerCase();
+      console.log('[calib status text]:', JSON.stringify(trimmed));
+
+      // Flexible match: "success", "ok", JSON, etc.
+      let isSuccess = trimmed === 'success' || trimmed === 'ok' || trimmed === 'done';
+      if (!isSuccess) {
+        try {
+          const j = JSON.parse(trimmed);
+          const s = String(j?.status ?? j?.event ?? '').toLowerCase();
+          if (s === 'success' || s === 'ok' || s === 'done' || s === 'true') isSuccess = true;
+        } catch {}
       }
+
+      if (isSuccess) goSuccess();
     },
     (err) => {
       if (!mountedRef.current) return;
+      console.warn('monitor error:', err);
       setErrorMessage('Unable to monitor lighting calibration.');
     }
   );
 
+  // 2) Write AFTER subscribe (tiny defer helps CCCD settle)
+  const t = setTimeout(() => {
+    calibrateLighting().catch((e: unknown) => console.warn('Start calib failed:', e));
+  }, 50);
+
+  // 3) Cleanup
   return () => {
     mountedRef.current = false;
-    unsubscribe?.();
+    clearTimeout(t);
+    safeUnsub();
   };
+  // If monitorLightingCalibration / calibrateLighting are stable from the hook, deps are fine.
 }, [connectedDevice]);
 
   const handleCancel = () => {

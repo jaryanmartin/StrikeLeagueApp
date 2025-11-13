@@ -26,9 +26,22 @@ export default function BluetoothScreen() {
   const palette = Colors[colorScheme];
   const isLightingCalibrated = useBleStore((state) => state.isLightingCalibrated);
 
+
   useEffect(() => {
     requestPermissions();
   }, []);
+
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     console.log('Starting BLE scan...');
+  //     startScan();
+
+  //     return () => {
+  //       console.log('Stopping BLE scan...');
+  //       stopScan();
+  //     };
+  //   }, [startScan, stopScan])
+  // );
  
   return (
     <ThemedView style={[styles.container, { backgroundColor: 'transparent' }]}>

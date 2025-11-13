@@ -10,6 +10,7 @@ export type BleState = {
   connectedDevice: Device | null;
   time: Date | null,
   isLightingCalibrated: boolean;
+  batteryLevel: number | null;
 
   setFaceAngle: (val: number) => void;
   setSwingPath: (val: number) => void;
@@ -19,6 +20,7 @@ export type BleState = {
   setConnectedDevice: (device: Device | null) => void;
   setTime: (date: Date) => void;
   setLightingCalibrated: (value: boolean) => void;
+  setBatteryLevel: (val: number | null) => void;
 };
 
 export const useBleStore = create<BleState>((set, get) => ({
@@ -30,6 +32,7 @@ export const useBleStore = create<BleState>((set, get) => ({
   connectedDevice: null,
   time: null,
   isLightingCalibrated: false,
+  batteryLevel: null,
 
   setFaceAngle: (val) => set({ faceAngle: val }),
   setSwingPath: (val) => set({ swingPath: val }),
@@ -39,4 +42,5 @@ export const useBleStore = create<BleState>((set, get) => ({
   setConnectedDevice: (device) => set({ connectedDevice: device, isLightingCalibrated: false }),
   setTime: (date) => set({time: date}),
   setLightingCalibrated: (value) => set({ isLightingCalibrated: value }),
+  setBatteryLevel: (val) => set({ batteryLevel: val }),
 }));
