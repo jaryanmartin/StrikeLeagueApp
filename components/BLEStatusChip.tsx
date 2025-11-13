@@ -1,9 +1,11 @@
 import { VIRTUAL_DEVICE_NAME } from '@/constants/ble';
+import type { BleState } from '@/stores/bleStores';
 import { useBleStore } from '@/stores/bleStores';
 import { StyleSheet, Text, View } from 'react-native';
 
 export default function BLEStatusChip() {
   const connectedDevice = useBleStore((s) => s.connectedDevice);
+  const batteryLevel = useBleStore((state: BleState) => state.batteryLevel);
   const isConnected = !!connectedDevice;
   const displayName =
     connectedDevice?.name || connectedDevice?.localName || VIRTUAL_DEVICE_NAME;
@@ -28,6 +30,15 @@ export default function BLEStatusChip() {
           <Text style={styles.value}>{displayName}</Text>
         </Text>
       )}
+
+      {isConnected && batteryLevel != null && (
+        <Text style={styles.label}>
+          Device Battery:{' '}
+          <Text style={styles.value}>{batteryLevel}%</Text>
+        </Text>
+      )}
+
+
     </View>
   );
 }

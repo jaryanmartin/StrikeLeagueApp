@@ -109,7 +109,6 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 6,
     textAlign: 'center',
-
 },
   subtitle: {
     maxWidth: 320,
