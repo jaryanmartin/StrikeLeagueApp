@@ -1,19 +1,22 @@
-// // Import the functions you need from the SDKs you need
-// import { initializeApp } from "firebase/app";
-// // TODO: Add SDKs for Firebase products that you want to use
-// // https://firebase.google.com/docs/web/setup#available-libraries
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
 
-// // Your web app's Firebase configuration
-// // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-// const firebaseConfig = {
-//   apiKey: "AIzaSyDl8cdWXzjrx_jUtDM8ntlVONOgUooI4rA",
-//   authDomain: "drivewise-938cb.firebaseapp.com",
-//   projectId: "drivewise-938cb",
-//   storageBucket: "drivewise-938cb.firebasestorage.app",
-//   messagingSenderId: "175730582918",
-//   appId: "1:175730582918:web:c049b108077ec5b136f807",
-//   measurementId: "G-EX66QT3J1M"
-// };
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-// // Initialize Firebase
-// const app = initializeApp(firebaseConfig);
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyDFTKeehznnI15fLXWWFQw44Jj6Fg2Z2RA",
+  authDomain: "strikeleaguefinal.firebaseapp.com",
+  projectId: "strikeleaguefinal",
+  storageBucket: "strikeleaguefinal.firebasestorage.app",
+  messagingSenderId: "751938608902",
+  appId: "1:751938608902:web:a6cb84661fb6c42f710887"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+// Export Firestore database
+export const db = getFirestore(app);

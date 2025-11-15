@@ -31,12 +31,12 @@ export default function BLEStatusChip() {
         </Text>
       )}
 
-      {isConnected && batteryLevel != null && (
+      {/* {isConnected && batteryLevel != null && (
         <Text style={styles.label}>
           Device Battery:{' '}
           <Text style={styles.value}>{batteryLevel}%</Text>
         </Text>
-      )}
+      )} */}
 
 
     </View>

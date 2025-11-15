@@ -47,35 +47,30 @@ useEffect(() => {
     (raw) => {
       if (!mountedRef.current) return;
 
-      // DEBUG: see exactly what we get
       console.log('[calib status raw]:', raw);
 
-      // If your hook already returns plain UTF-8 text, keep it simple:
-      let text = String(raw);
+      let text = String(raw).trim();
 
-      // If your hook returns base64 (react-native-ble-plx default), decode it:
+      // Try to JSON.parse first – handles "\"success\"" correctly
       try {
-        if (/^[A-Za-z0-9+/=]+$/.test(text)) {
-          // heuristic; remove if your hook already decodes
-          // @ts-ignore Buffer is polyfilled in your project; otherwise import a b64 decoder
-          text = Buffer.from(text, 'base64').toString('utf8');
-        }
-      } catch {}
-
-      const trimmed = text.trim().toLowerCase();
-      console.log('[calib status text]:', JSON.stringify(trimmed));
-
-      // Flexible match: "success", "ok", JSON, etc.
-      let isSuccess = trimmed === 'success' || trimmed === 'ok' || trimmed === 'done';
-      if (!isSuccess) {
-        try {
-          const j = JSON.parse(trimmed);
-          const s = String(j?.status ?? j?.event ?? '').toLowerCase();
-          if (s === 'success' || s === 'ok' || s === 'done' || s === 'true') isSuccess = true;
-        } catch {}
+        const parsed = JSON.parse(text);  // "success" → success
+        text = String(parsed).trim();
+      } catch {
+        // not JSON, keep as-is
       }
 
-      if (isSuccess) goSuccess();
+      const normalized = text.toLowerCase();
+      console.log('[calib status normalized]:', normalized);
+
+      const isSuccess =
+        normalized === 'success' ||
+        normalized === 'ok' ||
+        normalized === 'done' ||
+        normalized === 'true';
+
+      if (isSuccess) {
+        goSuccess();
+      }
     },
     (err) => {
       if (!mountedRef.current) return;
@@ -84,18 +79,15 @@ useEffect(() => {
     }
   );
 
-  // 2) Write AFTER subscribe (tiny defer helps CCCD settle)
   const t = setTimeout(() => {
     calibrateLighting().catch((e: unknown) => console.warn('Start calib failed:', e));
   }, 50);
 
-  // 3) Cleanup
   return () => {
     mountedRef.current = false;
     clearTimeout(t);
     safeUnsub();
   };
-  // If monitorLightingCalibration / calibrateLighting are stable from the hook, deps are fine.
 }, [connectedDevice]);
 
   const handleCancel = () => {

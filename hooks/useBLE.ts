@@ -16,7 +16,7 @@ const METRIC_CHARACTERISTIC_UUID = "d9c146d3-df83-49ec-801d-70494060d6d8";
 const FEEDBACK_CHARACTERISTIC_UUID = "2c58a217-0a9b-445f-adac-0b37bd8635c3";
 const LIGHTING_CHARACTERISTIC_UUID = "778c5d1a-315f-4baf-a23b-6429b84835e3";
 const STOP_LOOP_CHARACTERISTIC_UUID = "8f1a5ff0-399b-4afe-9cb4-280c8310e388";
-const BATTERY_CHARACTERISTIC_UUID = 'a834f0f7-89cc-453b-8be4-2905d27344bf';
+// const BATTERY_CHARACTERISTIC_UUID = 'a834f0f7-89cc-453b-8be4-2905d27344bf';
 
 const VIRTUAL_DEVICE_NAME = "group17rpi"; 
 
@@ -26,7 +26,7 @@ function useBLE() {
   const [allDevices, setAllDevices] = useState<Device[]>([]);
   const connectedDevice = useBleStore((state) => state.connectedDevice);
   const setConnectedDevice = useBleStore((state) => state.setConnectedDevice);
-  const setBatteryLevel = useBleStore((s) => s.setBatteryLevel);
+  // const setBatteryLevel = useBleStore((s) => s.setBatteryLevel);
   const {
   setFaceAngle,
   setSwingPath,
@@ -191,16 +191,16 @@ let isScanning = false;
       }
     }
 
-    else if ( characteristic.uuid === BATTERY_CHARACTERISTIC_UUID) 
-    {
-      try {
-        const parsed = JSON.parse(raw);
-        setBatteryLevel(parsed);
+    // else if ( characteristic.uuid === BATTERY_CHARACTERISTIC_UUID) 
+    // {
+    //   try {
+    //     const parsed = JSON.parse(raw);
+    //     setBatteryLevel(parsed);
 
-      } catch (err) {
-        console.error("Failed to parse BLE JSON:", err);
-      }
-    }
+    //   } catch (err) {
+    //     console.error("Failed to parse BLE JSON:", err);
+    //   }
+    // }
   }
 
   const startStreamingData = async (device: Device) => {
@@ -212,20 +212,20 @@ let isScanning = false;
         onDataUpdate
       );
 
-      device.monitorCharacteristicForService(
-        DATA_SERVICE_UUID,
-        BATTERY_CHARACTERISTIC_UUID, 
-        onDataUpdate
-      );
+      // device.monitorCharacteristicForService(
+      //   DATA_SERVICE_UUID,
+      //   BATTERY_CHARACTERISTIC_UUID, 
+      //   onDataUpdate
+      // );
 
     } else {
       console.log("No Device Connected");
     }
   };
 
-  const stopScan = () => {
-  bleManager.stopDeviceScan();
-};
+//   const stopScan = () => {
+//   bleManager.stopDeviceScan();
+// };
 
   const startRecord = async() => {
     if (!connectedDevice) {
@@ -405,7 +405,7 @@ let isScanning = false;
     requestPermissions,
     startScan,
     startStreamingData,
-    stopScan,
+    // stopScan,
     startRecord,
     calibrateLighting,
     stopSession,

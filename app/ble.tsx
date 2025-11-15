@@ -15,7 +15,7 @@ export default function BluetoothScreen() {
   const {
     requestPermissions,
     startScan,
-    stopScan,
+    // stopScan,
     allDevices,
     connectToDevice,
     connectedDevice,
@@ -104,7 +104,7 @@ export default function BluetoothScreen() {
           </ThemedText>
         </Pressable>
 
-        <Pressable
+        {/* <Pressable
           onPress={stopScan}
           style={({ pressed }) => [
             styles.secondaryAction,
@@ -118,7 +118,7 @@ export default function BluetoothScreen() {
           <ThemedText type="defaultSemiBold" style={styles.actionLabel}>
             Stop Scan
           </ThemedText>
-        </Pressable>
+        </Pressable> */}
       </View>
 
       <View style={styles.devicesSection}>
