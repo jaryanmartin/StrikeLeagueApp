@@ -11,6 +11,7 @@ export type BleState = {
   time: Date | null,
   isLightingCalibrated: boolean;
   batteryLevel: number | null;
+  sessionId: string | null;
 
   setFaceAngle: (val: number) => void;
   setSwingPath: (val: number) => void;
@@ -21,6 +22,7 @@ export type BleState = {
   setTime: (date: Date) => void;
   setLightingCalibrated: (value: boolean) => void;
   setBatteryLevel: (val: number | null) => void;
+  setSessionId: (id: string | null) => void;
 };
 
 export const useBleStore = create<BleState>((set, get) => ({
@@ -33,6 +35,7 @@ export const useBleStore = create<BleState>((set, get) => ({
   time: null,
   isLightingCalibrated: false,
   batteryLevel: null,
+  sessionId: null,
 
   setFaceAngle: (val) => set({ faceAngle: val }),
   setSwingPath: (val) => set({ swingPath: val }),
@@ -43,4 +46,5 @@ export const useBleStore = create<BleState>((set, get) => ({
   setTime: (date) => set({time: date}),
   setLightingCalibrated: (value) => set({ isLightingCalibrated: value }),
   setBatteryLevel: (val) => set({ batteryLevel: val }),
+  setSessionId: (id) => set({ sessionId: id }),
 }));

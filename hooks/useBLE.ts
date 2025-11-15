@@ -11,6 +11,12 @@ import {
   Subscription
 } from "react-native-ble-plx";
 
+import {
+  logSwing,
+  startSession,
+  type SwingMetrics,
+} from "@/app/utils/swingHistory";
+
 const DATA_SERVICE_UUID = "96f0284d-8895-4c08-baaf-402a2f7e8c5b";
 const METRIC_CHARACTERISTIC_UUID = "d9c146d3-df83-49ec-801d-70494060d6d8";
 const FEEDBACK_CHARACTERISTIC_UUID = "2c58a217-0a9b-445f-adac-0b37bd8635c3";
@@ -21,6 +27,7 @@ const STOP_LOOP_CHARACTERISTIC_UUID = "8f1a5ff0-399b-4afe-9cb4-280c8310e388";
 const VIRTUAL_DEVICE_NAME = "group17rpi"; 
 
 const bleManager = new BleManager();
+let pendingMetrics: SwingMetrics | null = null;
 
 function useBLE() {
   const [allDevices, setAllDevices] = useState<Device[]>([]);
@@ -101,6 +108,14 @@ let isScanning = false;
 
       await deviceConnection.requestMTU(185);
       await deviceConnection.discoverAllServicesAndCharacteristics();
+
+      const { sessionId, setSessionId } = useBleStore.getState();
+      if (!sessionId) {
+        const newSessionId = await startSession();
+        setSessionId(newSessionId);
+        pendingMetrics = null; // reset buffer at start
+        console.log("Started Firestore session:", newSessionId);
+      }
       
       bleManager.stopDeviceScan();
       await startStreamingData(deviceConnection);
@@ -132,27 +147,6 @@ let isScanning = false;
       }
     });
 
-//     const startScan = () => {
-//   if (isScanning) return;
-//   isScanning = true;
-
-//   bleManager.startDeviceScan(
-//     null,
-//     { allowDuplicates: false },
-//     (err, device) => {
-//       if (err) { console.warn('scan error:', err); stopScan(); return; }
-//       if (!device) return;
-
-//       // filter to your device(s) if desired
-//       const name = device.localName ?? device.name ?? '';
-//       if (name !== VIRTUAL_DEVICE_NAME) return;
-
-//       // upsert in global store (see store impl below)
-//       useBleStore.getState().upsertDevice(device);
-//     }
-//   );
-// };
-
   const onDataUpdate = (
     error: BleError | null,
     characteristic: Characteristic | null
@@ -183,8 +177,38 @@ let isScanning = false;
           if (typeof data["attack angle"] === "number") setAttackAngle(data["attack angle"]);
           if (typeof data["side angle"] === "number") setSideAngle(data["side angle"]);
           setTime(new Date());
+
+          pendingMetrics = {
+            faceAngle:
+              typeof data["face angle"] === "number"
+                ? data["face angle"]
+                : null,
+            swingPath:
+              typeof data["swing path"] === "number"
+                ? data["swing path"]
+                : null,
+            attackAngle:
+              typeof data["attack angle"] === "number"
+                ? data["attack angle"]
+                : null,
+            sideAngle:
+              typeof data["side angle"] === "number"
+                ? data["side angle"]
+                : null,
+          };
         } else {
-          setFeedback(raw);
+          const feedbackText =
+            typeof data.feedback === "string" ? data.feedback : raw;
+
+          setFeedback(feedbackText);
+
+          const { sessionId } = useBleStore.getState();
+          if (sessionId && pendingMetrics) {
+            logSwing(sessionId, pendingMetrics, feedbackText).catch((err) =>
+              console.error("Failed to log swing:", err)
+            );
+            pendingMetrics = null;
+          }
         }
       } catch (err) {
         console.error("Failed to parse BLE JSON:", err);
