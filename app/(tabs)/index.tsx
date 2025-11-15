@@ -79,6 +79,7 @@ export default function HomeScreen() {
             Cancel Session
           </ThemedText>
         </Pressable>
+
       </View>
     </ThemedView>
   );
