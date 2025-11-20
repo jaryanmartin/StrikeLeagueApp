@@ -6,11 +6,20 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import type { MetricKey } from '@/constants/metricInfo';
+import Swipeable from '@/hooks/useSwipeableHistory';
 import type { BleState } from '@/stores/bleStores';
 import { useBleStore } from '@/stores/bleStores';
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, ScrollView, StyleSheet, useColorScheme, View } from 'react-native';
+import { GestureDetector } from "react-native-gesture-handler";
+import Animated from "react-native-reanimated";
+
+import {
+  subscribeToSwings,
+  type SwingEntry
+} from '@/app/utils/swingHistory';
+
 
 const safeLocaleString = (value: Date | string | number | null | undefined) => {
   if (!value) {
@@ -58,22 +67,75 @@ export default function MetricScreen() {
 
   const colorScheme = useColorScheme() ?? 'light';
   const palette = Colors[colorScheme];
-  const faceAngle = useBleStore((state: BleState) => state.faceAngle);
-  const swingPath = useBleStore((state: BleState) => state.swingPath);
-  const sideAngle = useBleStore((state: BleState) => state.sideAngle);
-  const attackAngle = useBleStore((state: BleState) => state.attackAngle);
-  const time = useBleStore((state: BleState) => state.time);
 
-  const feedback = useBleStore((state: BleState) => state.feedback);
-  // const { readFeedback } = useBLE();
+  const faceAngleLive = useBleStore((state: BleState) => state.faceAngle);
+  const swingPathLive = useBleStore((state: BleState) => state.swingPath);
+  const sideAngleLive = useBleStore((state: BleState) => state.sideAngle);
+  const attackAngleLive = useBleStore((state: BleState) => state.attackAngle);
+  const timeLive = useBleStore((state: BleState) => state.time);
+  const feedbackLive = useBleStore((state: BleState) => state.feedback);
+  const sessionId = useBleStore((state: BleState) => state.sessionId);
 
   const [metricHistory, setMetricHistory] = useState<MetricHistory>({});
-
   const [infoMetric, setInfoMetric] = useState<MetricKey | null>(null);
   const [infoVisible, setInfoVisible] = useState(false);
+  const [swings, setSwings] = useState<SwingEntry[]>([]);
+  const [currentSwingIndex, setCurrentSwingIndex] = useState(0);
+
+  const hasHistory = !!sessionId && swings.length > 0;
+  const currentSwing = hasHistory ? swings[currentSwingIndex] : null;
 
   const openInfo = (key: MetricKey) => { setInfoMetric(key); setInfoVisible(true); };
   const closeInfo = () => setInfoVisible(false);
+
+  const faceAngle = hasHistory
+  ? currentSwing?.faceAngle ?? null
+  : faceAngleLive;
+
+const swingPath = hasHistory
+  ? currentSwing?.swingPath ?? null
+  : swingPathLive;
+
+const sideAngle = hasHistory
+  ? currentSwing?.sideAngle ?? null
+  : sideAngleLive;
+
+const attackAngle = hasHistory
+  ? currentSwing?.attackAngle ?? null
+  : attackAngleLive;
+
+const time = hasHistory
+  ? currentSwing?.timestamp ?? null
+  : timeLive;
+
+const feedback = hasHistory
+  ? currentSwing?.feedback ?? feedbackLive
+  : feedbackLive;
+
+
+  type Swing = {
+    id: string;
+    faceAngle: number;
+    swingPath: number;
+    sideAngle: number;
+    attackAngle: number;
+    feedback: string;
+    timestamp: Date;
+  };
+
+  const canSwipeDown = currentSwingIndex > 0;
+  const canSwipeUp = currentSwingIndex < swings.length - 1;
+
+  const { panGesture, animatedStyle } = Swipeable({
+    canSwipeUp,
+    canSwipeDown,
+    onSwipeUp: () => {
+      setCurrentSwingIndex((i) => Math.min(i + 1, swings.length - 1));
+    },
+    onSwipeDown: () => {
+      setCurrentSwingIndex((i) => Math.max(i - 1, 0));
+    },
+  });
 
   const appendHistory = useCallback((key: MetricKey, value: number | null | undefined) => {
     if (value === null || value === undefined) {
@@ -86,21 +148,33 @@ export default function MetricScreen() {
     });
   }, []);
 
-  useEffect(() => {
-    appendHistory('faceAngle', faceAngle);
-  }, [appendHistory, faceAngle]);
+  // useEffect(() => {
+  //   appendHistory('faceAngle', faceAngle);
+  // }, [appendHistory, faceAngle]);
+
+  // useEffect(() => {
+  //   appendHistory('swingPath', swingPath);
+  // }, [appendHistory, swingPath]);
+
+  // useEffect(() => {
+  //   appendHistory('sideAngle', sideAngle);
+  // }, [appendHistory, sideAngle]);
+
+  // useEffect(() => {
+  //   appendHistory('attackAngle', attackAngle);
+  // }, [appendHistory, attackAngle]);
 
   useEffect(() => {
-    appendHistory('swingPath', swingPath);
-  }, [appendHistory, swingPath]);
+    if (!sessionId) return;
 
-  useEffect(() => {
-    appendHistory('sideAngle', sideAngle);
-  }, [appendHistory, sideAngle]);
+    const unsubscribe = subscribeToSwings(sessionId, (entries) => {
+      setSwings(entries);
+      setCurrentSwingIndex(0);
+    });
 
-  useEffect(() => {
-    appendHistory('attackAngle', attackAngle);
-  }, [appendHistory, attackAngle]);
+    return () => unsubscribe();
+  }, [sessionId]);
+
 
   const formattedTimestamp = useMemo(() => safeLocaleString(time), [time]);
 
@@ -183,6 +257,8 @@ export default function MetricScreen() {
   const totalMetricRows = Math.ceil(enhancedMetrics.length / 2);
 
   return (
+    <GestureDetector gesture={panGesture}>
+      <Animated.View style={animatedStyle}>
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <GradientOverlay colors={palette.heroGradient} />
       <View style={[styles.heroSection, { paddingTop: 48 }]}>
@@ -260,6 +336,8 @@ export default function MetricScreen() {
           onClose={closeInfo}
         />
     </ScrollView>
+          </Animated.View>
+    </GestureDetector>
   );
 }
 

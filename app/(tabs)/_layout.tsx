@@ -8,6 +8,7 @@ import { useFonts } from 'expo-font';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform, Text } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -22,44 +23,46 @@ export default function TabLayout() {
   }
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarLabelStyle: {
-          fontSize: 12,
-          marginBottom: Platform.select({ ios: -2, default: 0 }),
-        },
-        tabBarStyle: Platform.select({
-          ios: {
-            position: 'absolute',
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Tabs
+        screenOptions={{
+          tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+          headerShown: false,
+          tabBarButton: HapticTab,
+          tabBarBackground: TabBarBackground,
+          tabBarLabelStyle: {
+            fontSize: 12,
+            marginBottom: Platform.select({ ios: -2, default: 0 }),
           },
-          default: {},
-        }),
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="metrics"
-        options={{
-          title: 'Metrics',
-          tabBarIcon: ({ color }) => <Ionicons name="golf" size={28} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          tabBarIcon: ({ color }) => <Ionicons name="settings-sharp" size={28} color={color} />,
-        }}
-      />
-    </Tabs>
+          tabBarStyle: Platform.select({
+            ios: {
+              position: 'absolute',
+            },
+            default: {},
+          }),
+        }}>
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: 'Home',
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="metrics"
+          options={{
+            title: 'Metrics',
+            tabBarIcon: ({ color }) => <Ionicons name="golf" size={28} color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="settings"
+          options={{
+            title: 'Settings',
+            tabBarIcon: ({ color }) => <Ionicons name="settings-sharp" size={28} color={color} />,
+          }}
+        />
+      </Tabs>
+    </GestureHandlerRootView>
   );
 }
