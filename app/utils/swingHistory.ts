@@ -1,38 +1,37 @@
-// app/utils/swingHistory.ts
-import { db } from "@/firebase";
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  getDocs,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-} from "firebase/firestore";
-
 export type SwingMetrics = {
   faceAngle: number | null;
   swingPath: number | null;
   attackAngle?: number | null;
   sideAngle?: number | null;
-  // add whatever you already have
 };
 
 export type SwingEntry = SwingMetrics & {
   id: string;
   timestamp: Date;
-  feedback: string; // or an object if you want
+  feedback: string;
 };
 
-// ---- session helpers ----
+const sessions: Record<string, SwingEntry[]> = {};
+
+const listeners: Record<string, Array<(swings: SwingEntry[]) => void>> = {};
+
+function notifySession(sessionId: string) {
+  const swings = sessions[sessionId] ?? [];
+  (listeners[sessionId] ?? []).forEach((cb) => cb([...swings]));
+}
+
+function generateSessionId() {
+  return `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
 
 export async function startSession(): Promise<string> {
-  const sessionRef = await addDoc(collection(db, "sessions"), {
-    startedAt: serverTimestamp(),
-  });
-  return sessionRef.id;
+  const sessionId = generateSessionId();
+
+  if (!sessions[sessionId]) {
+    sessions[sessionId] = [];
+  }
+
+  return sessionId;
 }
 
 export async function logSwing(
@@ -40,48 +39,48 @@ export async function logSwing(
   metrics: SwingMetrics,
   feedback: string
 ) {
-  const swingsCol = collection(db, "sessions", sessionId, "swings");
-  await addDoc(swingsCol, {
-    ...metrics,
+  if (!sessions[sessionId]) {
+    sessions[sessionId] = [];
+  }
+
+  const entry: SwingEntry = {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    timestamp: new Date(),
     feedback,
-    timestamp: serverTimestamp(),
-  });
+    faceAngle: metrics.faceAngle ?? null,
+    swingPath: metrics.swingPath ?? null,
+    attackAngle: metrics.attackAngle ?? null,
+    sideAngle: metrics.sideAngle ?? null,
+  };
+
+  sessions[sessionId].unshift(entry);
+
+  notifySession(sessionId);
 }
 
-// subscribe to swings for Analytics tab
 export function subscribeToSwings(
   sessionId: string,
   onUpdate: (swings: SwingEntry[]) => void
 ) {
-  const swingsCol = collection(db, "sessions", sessionId, "swings");
-  const q = query(swingsCol, orderBy("timestamp", "desc")); // newest first
+  if (!sessions[sessionId]) {
+    sessions[sessionId] = [];
+  }
+  if (!listeners[sessionId]) {
+    listeners[sessionId] = [];
+  }
 
-  return onSnapshot(q, (snap) => {
-    const data: SwingEntry[] = snap.docs.map((d) => {
-      const raw = d.data() as any;
-      return {
-        id: d.id,
-        feedback: raw.feedback ?? "",
-        faceAngle: raw.faceAngle ?? null,
-        swingPath: raw.swingPath ?? null,
-        attackAngle: raw.attackAngle ?? null,
-        sideAngle: raw.sideAngle ?? null,
-        timestamp: raw.timestamp?.toDate
-          ? raw.timestamp.toDate()
-          : new Date(),
-      };
-    });
-    onUpdate(data);
-  });
+  listeners[sessionId].push(onUpdate);
+
+  onUpdate([...sessions[sessionId]]);
+
+  return () => {
+    listeners[sessionId] = (listeners[sessionId] ?? []).filter(
+      (cb) => cb !== onUpdate
+    );
+  };
 }
 
-// delete all swings for a session (call when session ends)
 export async function clearSession(sessionId: string) {
-  const swingsCol = collection(db, "sessions", sessionId, "swings");
-  const snap = await getDocs(swingsCol);
-  await Promise.all(
-    snap.docs.map((d) =>
-      deleteDoc(doc(db, "sessions", sessionId, "swings", d.id))
-    )
-  );
+  sessions[sessionId] = [];
+  notifySession(sessionId);
 }

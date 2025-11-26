@@ -113,16 +113,6 @@ const feedback = hasHistory
   : feedbackLive;
 
 
-  type Swing = {
-    id: string;
-    faceAngle: number;
-    swingPath: number;
-    sideAngle: number;
-    attackAngle: number;
-    feedback: string;
-    timestamp: Date;
-  };
-
   const canSwipeDown = currentSwingIndex > 0;
   const canSwipeUp = currentSwingIndex < swings.length - 1;
 

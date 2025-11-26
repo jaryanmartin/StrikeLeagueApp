@@ -114,7 +114,7 @@ let isScanning = false;
         const newSessionId = await startSession();
         setSessionId(newSessionId);
         pendingMetrics = null; // reset buffer at start
-        console.log("Started Firestore session:", newSessionId);
+        console.log("Started local swing session:", newSessionId);
       }
       
       bleManager.stopDeviceScan();
