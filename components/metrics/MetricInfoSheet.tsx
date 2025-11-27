@@ -36,19 +36,7 @@ export default function MetricInfoSheet({ metric, visible, onClose }: Props) {
             <ThemedText style={[styles.paragraph, { color: palette.text }]}>{data.summary}</ThemedText>
           ) : null}
 
-          {data?.ranges ? (
-            <View
-              style={[
-                styles.card,
-                { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' },
-              ]}
-            >
-              <ThemedText type="subtitle">Typical Ranges</ThemedText>
-              {data.ranges.good && <ThemedText>✅ {data.ranges.good}</ThemedText>}
-              {data.ranges.caution && <ThemedText>⚠️ {data.ranges.caution}</ThemedText>}
-              {data.ranges.poor && <ThemedText>⛔ {data.ranges.poor}</ThemedText>}
-            </View>
-          ) : null}
+          
 
           {data?.tips?.length ? (
             <View
@@ -78,6 +66,7 @@ const styles = StyleSheet.create({
     padding: 16,
     maxHeight: '80%',
     backgroundColor: 'white',
+    minHeight: 600,
   },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
   content: { paddingBottom: 24, gap: 12 },

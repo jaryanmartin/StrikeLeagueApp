@@ -10,12 +10,7 @@ export const METRIC_INFO: Record<MetricKey, {
   faceAngle: {
     title: 'Face Angle',
     summary:
-      'Face Angle is the clubface orientation (open/closed) relative to the target line at impact. Positive = open (right), negative = closed (left).',
-    ranges: {
-      good: '±1° to ±2° is typically “square enough” for many mid-irons.',
-      caution: '±3° to ±5° may push/pull starts.',
-      poor: '> ±5° often produces large starting direction errors.'
-    },
+      'Face Angle indicates the direction the clubface is pointed at impact relative to the target line, and it’s the biggest factor in determining the golf ball’s starting direction. A positive value means the face is pointed right (open), and a negative value means it’s pointed left (closed).',
     image: require('@/assets/images/face-angle.png'),
     tips: [
       'Match face to path for your intended shot shape.',
@@ -25,22 +20,22 @@ export const METRIC_INFO: Record<MetricKey, {
   swingPath: {
     title: 'Swing Path',
     summary:
-      'Clubhead horizontal path at impact relative to target. Positive = in-to-out (draw bias), negative = out-to-in (fade bias).',
+      'Swing Path describes the direction the clubhead is traveling (right or left) through impact relative to the target line, which strongly influences shot curve. A positive value means the club is moving right (‘in-to-out’), while a negative value means it’s moving left (‘out-to-in’).',
     image: require('@/assets/images/club-path.png'),
     tips: ['Ball starts mostly where face points; path influences curvature.'],
   },
   attackAngle: {
     title: 'Attack Angle',
     summary:
-      'Vertical clubhead motion at impact. Negative = hitting down, positive = hitting up.',
+      'Attack Angle describes whether the club is moving upward or downward at impact. Negative values (hitting down) are ideal for irons, while positive values (hitting up) help maximize distance with the driver.',
     image: require('@/assets/images/attack-angle.png'),
-    tips: ['Irons: slightly down. Driver: often slightly up for distance.'],
+    tips: ['For irons, aim for a slight downward strike.'],
   },
   sideAngle: {
     title: 'Side Angle',
     summary:
-      'Horizontal launch direction relative to target line (ball’s initial start line). Positive = right, negative = left.',
+      'Side Angle (Azimuth) shows the direction the ball actually launches, left or right, after the golf ball leaves the club. It represents the ball’s real starting direction, combining both your clubface and swing path, and helps predict where the shot will end up.',
     image: require('@/assets/images/side-angle.png'),
-    tips: ['Primarily controlled by face angle at impact.'],
+    tips: ['Training Drill: Lay a club or alignment stick on the ground. Make sure your feet, hips, and shoulders are pointed parallel to the target line before swinging.'],
   },
 };

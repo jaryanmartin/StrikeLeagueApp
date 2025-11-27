@@ -146,22 +146,6 @@ export default function MetricScreen() {
     });
   }, []);
 
-  // useEffect(() => {
-  //   appendHistory('faceAngle', faceAngle);
-  // }, [appendHistory, faceAngle]);
-
-  // useEffect(() => {
-  //   appendHistory('swingPath', swingPath);
-  // }, [appendHistory, swingPath]);
-
-  // useEffect(() => {
-  //   appendHistory('sideAngle', sideAngle);
-  // }, [appendHistory, sideAngle]);
-
-  // useEffect(() => {
-  //   appendHistory('attackAngle', attackAngle);
-  // }, [appendHistory, attackAngle]);
-
   useEffect(() => {
     if (!sessionId) return;
 
@@ -256,20 +240,20 @@ export default function MetricScreen() {
   return (
     <GestureDetector gesture={panGesture}>
       <Animated.View style={animatedStyle}>
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <GradientOverlay colors={palette.heroGradient} />
-      <View style={[styles.heroSection, { paddingTop: 48 }]}>
-        <GradientOverlay
-          colors={[`${palette.accent}1A`, 'transparent']}
-          style={styles.heroGlow}
-          start={{ x: 0.2, y: 0 }}
-          end={{ x: 0.8, y: 1 }}
-          pointerEvents="none"
-        />
-        <ThemedText type="title" style={styles.titleText}>
-          Swing Analytics
-        </ThemedText>
-      </View>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <GradientOverlay colors={palette.heroGradient} />
+          <View style={[styles.heroSection, { paddingTop: 48 }]}>
+            <GradientOverlay
+              colors={[`${palette.accent}1A`, 'transparent']}
+              style={styles.heroGlow}
+              start={{ x: 0.2, y: 0 }}
+              end={{ x: 0.8, y: 1 }}
+              pointerEvents="none"
+            />
+            <ThemedText type="title" style={styles.titleText}>
+              Swing Analytics
+            </ThemedText>
+          </View>
 
         <ThemedView style={styles.feedbackCard}>
           <View style={styles.sectionHeader}>
