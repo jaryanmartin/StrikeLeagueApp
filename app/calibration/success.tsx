@@ -24,12 +24,15 @@ export default function LightingCalibrationSuccessScreen() {
         <ThemedText type="title" style={styles.titleText}>
           Lighting Calibration Complete!
         </ThemedText>
+
         <ThemedText style={styles.subtitle} type="subtitle">
           Your lighting calibration finished successfully. You can return to the home screen to continue.
         </ThemedText>
+
         <Pressable style={styles.actionButton} onPress={() => router.replace('/settings')}>
           <ThemedText style={styles.actionButtonText}>Okay</ThemedText>
         </Pressable>
+
       </View>
     </ThemedView>
   );
@@ -56,6 +59,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   actionButton: {
+    marginTop: 450, 
     borderRadius: 20,
     borderWidth: 3,
     borderColor: 'black',
