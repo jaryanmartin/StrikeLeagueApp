@@ -1,3 +1,4 @@
+import { FeedbackGroup } from '@/app/utils/swingHistory';
 import { Device } from 'react-native-ble-plx';
 import { create } from 'zustand';
 
@@ -12,6 +13,7 @@ export type BleState = {
   isLightingCalibrated: boolean;
   batteryLevel: number | null;
   sessionId: string | null;
+  feedbackGroup: FeedbackGroup | null;
 
   setFaceAngle: (val: number) => void;
   setSwingPath: (val: number) => void;
@@ -23,6 +25,7 @@ export type BleState = {
   setLightingCalibrated: (value: boolean) => void;
   setBatteryLevel: (val: number | null) => void;
   setSessionId: (id: string | null) => void;
+  setFeedbackGroup: (group: FeedbackGroup | null) => void;
 };
 
 export const useBleStore = create<BleState>((set, get) => ({
@@ -36,6 +39,7 @@ export const useBleStore = create<BleState>((set, get) => ({
   isLightingCalibrated: false,
   batteryLevel: null,
   sessionId: null,
+  feedbackGroup: null,
 
   setFaceAngle: (val) => set({ faceAngle: val }),
   setSwingPath: (val) => set({ swingPath: val }),
@@ -47,4 +51,5 @@ export const useBleStore = create<BleState>((set, get) => ({
   setLightingCalibrated: (value) => set({ isLightingCalibrated: value }),
   setBatteryLevel: (val) => set({ batteryLevel: val }),
   setSessionId: (id) => set({ sessionId: id }),
+  setFeedbackGroup: (feedbackGroup) => set({ feedbackGroup }),
 }));

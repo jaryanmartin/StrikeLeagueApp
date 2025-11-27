@@ -1,4 +1,5 @@
 import { GradientOverlay } from '@/components/GradientOverlay';
+import FeedbackDetails from '@/components/metrics/FeedbackDetails';
 import MetricCard from '@/components/metrics/MetricCard';
 import MetricInfoSheet from '@/components/metrics/MetricInfoSheet';
 import SkeletonLoader from '@/components/metrics/SkeletonLoader';
@@ -11,7 +12,7 @@ import type { BleState } from '@/stores/bleStores';
 import { useBleStore } from '@/stores/bleStores';
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { FlatList, Pressable, ScrollView, StyleSheet, useColorScheme, View } from 'react-native';
+import { FlatList, Modal, Pressable, ScrollView, StyleSheet, useColorScheme, View } from 'react-native';
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 
@@ -67,6 +68,7 @@ export default function MetricScreen() {
 
   const colorScheme = useColorScheme() ?? 'light';
   const palette = Colors[colorScheme];
+  const feedbackGroupLive = useBleStore((state: BleState) => state.feedbackGroup);
 
   const faceAngleLive = useBleStore((state: BleState) => state.faceAngle);
   const swingPathLive = useBleStore((state: BleState) => state.swingPath);
@@ -81,6 +83,7 @@ export default function MetricScreen() {
   const [infoVisible, setInfoVisible] = useState(false);
   const [swings, setSwings] = useState<SwingEntry[]>([]);
   const [currentSwingIndex, setCurrentSwingIndex] = useState(0);
+  const [feedbackInfoVisible, setFeedbackInfoVisible] = useState(false);
 
   const hasHistory = !!sessionId && swings.length > 0;
   const currentSwing = hasHistory ? swings[currentSwingIndex] : null;
@@ -92,26 +95,31 @@ export default function MetricScreen() {
   ? currentSwing?.faceAngle ?? null
   : faceAngleLive;
 
-const swingPath = hasHistory
-  ? currentSwing?.swingPath ?? null
-  : swingPathLive;
+  const swingPath = hasHistory
+    ? currentSwing?.swingPath ?? null
+    : swingPathLive;
 
-const sideAngle = hasHistory
-  ? currentSwing?.sideAngle ?? null
-  : sideAngleLive;
+  const sideAngle = hasHistory
+    ? currentSwing?.sideAngle ?? null
+    : sideAngleLive;
 
-const attackAngle = hasHistory
-  ? currentSwing?.attackAngle ?? null
-  : attackAngleLive;
+  const attackAngle = hasHistory
+    ? currentSwing?.attackAngle ?? null
+    : attackAngleLive;
 
-const time = hasHistory
-  ? currentSwing?.timestamp ?? null
-  : timeLive;
+  const time = hasHistory
+    ? currentSwing?.timestamp ?? null
+    : timeLive;
 
-const feedback = hasHistory
-  ? currentSwing?.feedback ?? feedbackLive
-  : feedbackLive;
+    const feedbackGroup = hasHistory
+  ? currentSwing?.feedback?.group ?? null
+  : feedbackGroupLive;
 
+  const feedbackMessage = hasHistory
+    ? currentSwing?.feedback?.message ?? feedbackLive
+    : feedbackLive;
+
+  const isFeedbackLoading = !feedbackMessage;
 
   const canSwipeDown = currentSwingIndex > 0;
   const canSwipeUp = currentSwingIndex < swings.length - 1;
@@ -243,7 +251,6 @@ const feedback = hasHistory
     [metrics],
   );
 
-  const isFeedbackLoading = !feedback;
   const totalMetricRows = Math.ceil(enhancedMetrics.length / 2);
 
   return (
@@ -266,20 +273,40 @@ const feedback = hasHistory
 
         <ThemedView style={styles.feedbackCard}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="chatbubble-ellipses" size={20} color="white" />
-            <ThemedText style={styles.sectionLabel} type="subtitle">
-              Feedback
-            </ThemedText>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Ionicons name="chatbubble-ellipses" size={20} color="white" />
+              <ThemedText style={styles.sectionLabel} type="subtitle">
+                Feedback
+              </ThemedText>
+            </View>
+
+            {feedbackGroup && (
+              <Pressable
+                onPress={() => setFeedbackInfoVisible(true)}
+                style={{ padding: 6 }}
+                accessibilityLabel="More info about this feedback"
+              >
+                <Ionicons
+                  name="information-circle-outline"
+                  size={20}
+                  color="white"
+                />
+              </Pressable>
+            )}
           </View>
+
           {isFeedbackLoading ? (
             <SkeletonLoader height={60} borderRadius={14} />
           ) : (
-            <ThemedText style={styles.feedbackText}>{feedback}</ThemedText>
+            <ThemedText style={styles.feedbackText}>{feedbackMessage}</ThemedText>
           )}
+
           {formattedTimestamp ? (
             <View style={styles.timestampRow}>
               <Ionicons name="time" size={16} color="rgba(255,255,255,0.7)" />
-              <ThemedText style={styles.timestamp}>Updated {formattedTimestamp}</ThemedText>
+              <ThemedText style={styles.timestamp}>
+                Updated {formattedTimestamp}
+              </ThemedText>
             </View>
           ) : null}
         </ThemedView>
@@ -325,6 +352,27 @@ const feedback = hasHistory
           visible={infoVisible}
           onClose={closeInfo}
         />
+        {feedbackGroup && (
+      <Modal
+        transparent
+        visible={feedbackInfoVisible}
+        animationType="slide"
+        onRequestClose={() => setFeedbackInfoVisible(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={[styles.modalContent, { backgroundColor: 'rgba(0,0,0,0.9)' }]}>
+            <View style={styles.modalHeader}>
+              <ThemedText type="subtitle">Grip & Stance Tips</ThemedText>
+              <Pressable onPress={() => setFeedbackInfoVisible(false)}>
+                <Ionicons name="close" size={20} color="white" />
+              </Pressable>
+            </View>
+
+            <FeedbackDetails group={feedbackGroup} />
+          </View>
+        </View>
+      </Modal>
+    )}
     </ScrollView>
           </Animated.View>
     </GestureDetector>
@@ -357,6 +405,7 @@ const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 8,
   },
   sectionLabel: {
@@ -418,5 +467,21 @@ const styles = StyleSheet.create({
     right: -120,
     height: 320,
     borderRadius: 240,
+  },
+  modalBackdrop: {
+  flex: 1,
+  backgroundColor: 'rgba(0,0,0,0.6)',
+  justifyContent: 'flex-end',
+  },
+  modalContent: {
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
   },
 });

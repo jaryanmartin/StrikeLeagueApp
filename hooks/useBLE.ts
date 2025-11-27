@@ -14,12 +14,13 @@ import {
 import {
   logSwing,
   startSession,
+  type FeedbackGroup,
+  type SwingFeedback,
   type SwingMetrics,
 } from "@/app/utils/swingHistory";
 
 const DATA_SERVICE_UUID = "96f0284d-8895-4c08-baaf-402a2f7e8c5b";
 const METRIC_CHARACTERISTIC_UUID = "d9c146d3-df83-49ec-801d-70494060d6d8";
-const FEEDBACK_CHARACTERISTIC_UUID = "2c58a217-0a9b-445f-adac-0b37bd8635c3";
 const LIGHTING_CHARACTERISTIC_UUID = "778c5d1a-315f-4baf-a23b-6429b84835e3";
 const STOP_LOOP_CHARACTERISTIC_UUID = "8f1a5ff0-399b-4afe-9cb4-280c8310e388";
 // const BATTERY_CHARACTERISTIC_UUID = 'a834f0f7-89cc-453b-8be4-2905d27344bf';
@@ -28,6 +29,7 @@ const VIRTUAL_DEVICE_NAME = "group17rpi";
 
 const bleManager = new BleManager();
 let pendingMetrics: SwingMetrics | null = null;
+let pendingGroup: FeedbackGroup | null = null;
 
 function useBLE() {
   const [allDevices, setAllDevices] = useState<Device[]>([]);
@@ -41,7 +43,9 @@ function useBLE() {
   setAttackAngle,
   setFeedback,
   setTime,
+  setFeedbackGroup,
 } = useBleStore.getState();
+
 const scanningRef = useRef<boolean>(false);
 let isScanning = false;
 
@@ -114,6 +118,7 @@ let isScanning = false;
         const newSessionId = await startSession();
         setSessionId(newSessionId);
         pendingMetrics = null; // reset buffer at start
+        pendingGroup = null;
         console.log("Started local swing session:", newSessionId);
       }
       
@@ -163,8 +168,7 @@ let isScanning = false;
     const raw = Buffer.from(characteristic.value, 'base64').toString('utf-8');
     // console.log("UTF-8 Decoded String:", jsonStr);
 
-    if ( characteristic.uuid === METRIC_CHARACTERISTIC_UUID) 
-    {
+    if (characteristic.uuid === METRIC_CHARACTERISTIC_UUID) {
       try {
         const data = JSON.parse(raw);
         console.log("Received BLE data:", data);
@@ -172,59 +176,83 @@ let isScanning = false;
         const t = typeof data?.type === "string" ? data.type.toLowerCase() : "";
 
         if (t === "metrics") {
-          if (typeof data["face angle"] === "number") setFaceAngle(data["face angle"]);
-          if (typeof data["swing path"] === "number") setSwingPath(data["swing path"]);
-          if (typeof data["attack angle"] === "number") setAttackAngle(data["attack angle"]);
-          if (typeof data["side angle"] === "number") setSideAngle(data["side angle"]);
+          const m =
+            data.metrics && typeof data.metrics === "object" ? data.metrics : data;
+
+          const faceAngleVal =
+            typeof m["face angle"] === "number" ? m["face angle"] : null;
+          const swingPathVal =
+            typeof m["swing path"] === "number" ? m["swing path"] : null;
+          const attackAngleVal =
+            typeof m["attack angle"] === "number" ? m["attack angle"] : null;
+          const sideAngleVal =
+            typeof m["side angle"] === "number" ? m["side angle"] : null;
+
+          if (faceAngleVal !== null) setFaceAngle(faceAngleVal);
+          if (swingPathVal !== null) setSwingPath(swingPathVal);
+          if (attackAngleVal !== null) setAttackAngle(attackAngleVal);
+          if (sideAngleVal !== null) setSideAngle(sideAngleVal);
           setTime(new Date());
 
           pendingMetrics = {
-            faceAngle:
-              typeof data["face angle"] === "number"
-                ? data["face angle"]
-                : null,
-            swingPath:
-              typeof data["swing path"] === "number"
-                ? data["swing path"]
-                : null,
-            attackAngle:
-              typeof data["attack angle"] === "number"
-                ? data["attack angle"]
-                : null,
-            sideAngle:
-              typeof data["side angle"] === "number"
-                ? data["side angle"]
-                : null,
+            faceAngle: faceAngleVal,
+            swingPath: swingPathVal,
+            attackAngle: attackAngleVal,
+            sideAngle: sideAngleVal,
           };
-        } else {
+
+          const rawGroup =
+            typeof m.group === "string" ? m.group : typeof data.group === "string" ? data.group : "";
+          const normalized = rawGroup.trim().toLowerCase();
+
+          let group: FeedbackGroup | null = null;
+          switch (normalized) {
+            case "pull":
+              group = "Pull";
+              break;
+            case "push":
+              group = "Push";
+              break;
+            case "slice":
+              group = "Slice";
+              break;
+            case "hook":
+              group = "Hook";
+              break;
+            case "ideal":
+              group = "Ideal";
+              break;
+          }
+
+          pendingGroup = group;
+          setFeedbackGroup(group);
+        }
+        else {
           const feedbackText =
             typeof data.feedback === "string" ? data.feedback : raw;
 
           setFeedback(feedbackText);
 
           const { sessionId } = useBleStore.getState();
-          if (sessionId && pendingMetrics) {
-            logSwing(sessionId, pendingMetrics, feedbackText).catch((err) =>
+          if (sessionId && pendingMetrics && pendingGroup) {
+            const structuredFeedback: SwingFeedback = {
+              group: pendingGroup,
+              message: feedbackText,
+            };
+
+            logSwing(sessionId, pendingMetrics, structuredFeedback).catch((err) =>
               console.error("Failed to log swing:", err)
             );
+
+            // Clear pending for next swing
             pendingMetrics = null;
+            pendingGroup = null;
           }
         }
       } catch (err) {
         console.error("Failed to parse BLE JSON:", err);
       }
     }
-
-    // else if ( characteristic.uuid === BATTERY_CHARACTERISTIC_UUID) 
-    // {
-    //   try {
-    //     const parsed = JSON.parse(raw);
-    //     setBatteryLevel(parsed);
-
-    //   } catch (err) {
-    //     console.error("Failed to parse BLE JSON:", err);
-    //   }
-    // }
   }
 
   const startStreamingData = async (device: Device) => {

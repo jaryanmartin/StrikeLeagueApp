@@ -1,3 +1,5 @@
+// swingHistory.ts
+
 export type SwingMetrics = {
   faceAngle: number | null;
   swingPath: number | null;
@@ -5,14 +7,20 @@ export type SwingMetrics = {
   sideAngle?: number | null;
 };
 
+export type FeedbackGroup = 'Pull' | 'Push' | 'Slice' | 'Hook' | 'Ideal';
+
+export type SwingFeedback = {
+  group: FeedbackGroup;   // used for images + text
+  message?: string;       // optional raw message from backend if you want
+};
+
 export type SwingEntry = SwingMetrics & {
   id: string;
   timestamp: Date;
-  feedback: string;
+  feedback: SwingFeedback | null;   // <- now an object, can be null
 };
 
 const sessions: Record<string, SwingEntry[]> = {};
-
 const listeners: Record<string, Array<(swings: SwingEntry[]) => void>> = {};
 
 function notifySession(sessionId: string) {
@@ -37,7 +45,7 @@ export async function startSession(): Promise<string> {
 export async function logSwing(
   sessionId: string,
   metrics: SwingMetrics,
-  feedback: string
+  feedback: SwingFeedback | null   // <- accepts group + optional message
 ) {
   if (!sessions[sessionId]) {
     sessions[sessionId] = [];
@@ -54,7 +62,6 @@ export async function logSwing(
   };
 
   sessions[sessionId].unshift(entry);
-
   notifySession(sessionId);
 }
 
@@ -70,7 +77,6 @@ export function subscribeToSwings(
   }
 
   listeners[sessionId].push(onUpdate);
-
   onUpdate([...sessions[sessionId]]);
 
   return () => {
